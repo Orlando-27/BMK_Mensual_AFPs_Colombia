@@ -1,0 +1,116 @@
+
+===== INICIO MACRO MULTIFONDOS.xlsm :: 'CLASIFICACION' =====
+  r0: NEMO | CLASE DE INVERSION | MONEDA | TASA FACIAL | UBICACION | CLASIFICACION | RIESGO | CLASE | Ubicación | Clasificación | Monedas | Riesgo | Clasificación RF | CONTROL | Clasificación RFI
+  r1: CA14068G1046 | Acciones Internacion | CAD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | R VARIABLE | INTERNACIONAL | ACCIONES INTERNACION | =C2 | No Reporta |  | =COUNTIF(A:A,A2) | NA
+  r2: US1921085049 | Acciones Internacion | USD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | R VARIABLE | INTERNACIONAL | ACCIONES INTERNACION | =C3 | No Reporta |  | =COUNTIF(A:A,A3) | NA
+  r3: CA3809564097 | Acciones Internacion | CAD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | R VARIABLE | INTERNACIONAL | ACCIONES INTERNACION | =C4 | No Reporta |  | =COUNTIF(A:A,A4) | NA
+  r4: CA4969024047 | Acciones Internacion | CAD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | R VARIABLE | INTERNACIONAL | ACCIONES INTERNACION | =C5 | No Reporta |  | =COUNTIF(A:A,A5) | NA
+  r5: CA6979001089 | Acciones Internacion | CAD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | R VARIABLE | INTERNACIONAL | ACCIONES INTERNACION | =C6 | No Reporta |  | =COUNTIF(A:A,A6) | NA
+  r6: CA69946Q1046 | Acciones Internacion | CAD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | R VARIABLE | INTERNACIONAL | ACCIONES INTERNACION | =C7 | No Reporta |  | =COUNTIF(A:A,A7) | NA
+  r7: CA8283361076 | Acciones Internacion | CAD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | R VARIABLE | INTERNACIONAL | ACCIONES INTERNACION | =C8 | No Reporta |  | =COUNTIF(A:A,A8) | NA
+  r8: AOPF5 AH 3547 COLPAT | VISTA | COP | TASA FIJA | NACIONAL | CAJA | VARIABLE | CAJA | NACIONAL | VISTA | COP | No Reporta |  | =COUNTIF(A:A,A9) | NA
+  r9: AOPF5 AH B BANCOLOMB | VISTA | COP | TASA FIJA | NACIONAL | CAJA | VARIABLE | CAJA | NACIONAL | VISTA | COP | No Reporta |  | =COUNTIF(A:A,A10) | NA
+  r10: AOPF5 AH B BOGOTA | VISTA | COP | TASA FIJA | NACIONAL | CAJA | VARIABLE | CAJA | NACIONAL | VISTA | COP | No Reporta |  | =COUNTIF(A:A,A11) | NA
+  r11: AOPF5 AH B CITIBANK | VISTA | COP | TASA FIJA | NACIONAL | CAJA | VARIABLE | CAJA | NACIONAL | VISTA | COP | No Reporta |  | =COUNTIF(A:A,A12) | NA
+
+===== INICIO MACRO MULTIFONDOS.xlsm :: 'TITULOS NUEVOS' =====
+  r0: ISIN | NEMO | FRECUENCIA | MONEDA | CONTROL |  |  |  |  |  |  |  |  |  |  |  |  | 76014084888.72 |  | GOLDCORP INC    | 2e-05 | 17385326.06 | 76798666509.35
+  r1: LU0523222270 | LU0523222270 | NAp | USD | =COUNTIF(A:A,A2)
+  r2: LU0231479717 | LU0231479717 | NAp | USD | =COUNTIF(A:A,A3)
+  r3: COB07PA00078 | BCOLOMBIA | NAp | COP | =COUNTIF(A:A,A4)
+  r4: COB01PA00030 | BOGOTA | NAp | COP | =COUNTIF(A:A,A5)
+  r5: COR01PA00010 | BVC | NAp | COP | =COUNTIF(A:A,A6)
+  r6: COT60PA00038 | CELSIA | NAp | COP | =COUNTIF(A:A,A7)
+  r7: COD38PA00046 | CEMARGOS | NAp | COP | =COUNTIF(A:A,A8)
+
+===== INICIO MACRO MULTIFONDOS.xlsm :: 'CPRVI' =====
+  r0: =COLUMN() | 2 | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN() | =COLUMN()
+  r1: ISIN | NOM  | NAM | SECTOR | GLOBAL | US EQUITY | EUROPEAN EQUITY +  U | JAPON EQUITY | EM GLOBAL | EM ASIAN EQUITY | LATIN AMERICAN EQUIT | ALTERNATIVE | TOTAL | ORO | PLATA | REAL ESTATE | CONTROL | RIESGO | USD | EUR | JPY | CAD | GBP | MXN | BRL | AUD | COP | TOTAL
+  r2: US4642866655 | iShares MSCI Pacific | ETF Asia | EM ASIAN EQUITY | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | =SUM(E3:L3) | 0 | 0 | 0 | =COUNTIF(A:A,A3) | =+_xlfn.XLOOKUP(A3,' | 0.054425692566613657 | 0 | 0 | 0 | 0 | 0 | 0 | 0.9455743074333867 | 0 | =SUM(S3:AA3)
+  r3: LU0188802960 | PICTET JAPAN INDEX | FM Japan | ASIAN EQUITY | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | =SUM(E4:L4) | 0 | 0 | 0 | =COUNTIF(A:A,A4) | JPY | 0 | 0 | 0.9999999999999999 | 0 | 0 | 0 | 0 | 0 | 0 | =SUM(S4:AA4)
+  r4: LU0106240533 | SCHRODER ISF JAPANES | FM Japan | ASIAN EQUITY | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | =SUM(E5:L5) | 0 | 0 | 0 | =COUNTIF(A:A,A5) | JPY | 0 | 0 | 0.9999999999999999 | 0 | 0 | 0 | 0 | 0 | 0 | =SUM(S5:AA5)
+  r5: US97717W8516 | WisdomTree Japan Hed | ETF Japan | ASIAN EQUITY | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | =SUM(E6:L6) | 0 | 0 | 0 | =COUNTIF(A:A,A6) | USD | 0.002986741222665818 | 0 | 0.9970132587773363 | 0 | 0 | 0 | 0 | 0 | 0 | =SUM(S6:AA6)
+  r6: LU0607514808 | INVESCO JAPANESE EQU | FM Japan | ASIAN EQUITY | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | =SUM(E7:L7) | 0 | 0 | 0 | =COUNTIF(A:A,A7) | JPY | 0 | 0 | 0.9999931202195407 | 0 | 0 | 0 | 0 | 0 | 0 | =SUM(S7:AA7)
+  r7: LU0248056110 | JPM JF Japan Eq I Ac | FM Japan | ASIAN EQUITY | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | =SUM(E8:L8) | 0 | 0 | 0 | =COUNTIF(A:A,A8) | JPY | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | =SUM(S8:AA8)
+
+===== INICIO MACRO MULTIFONDOS.xlsm :: 'PORTAFOLIOS' =====
+  r0: Fondo | Nemo | ISIN | TITULO | Emisor | ESPECIE | F.Compra | Emision  | F.Vcto   | Moneda | Vr Nominal | Vr Mercado | CLASE DE INVERSION | MONEDA | TASA FACIAL | UBICACION | CLASIFICACION | RIESGO | TASA FACIAL | VALOR TASA FACIAL | TASA  DE DESCUENTO | FRECUENCIA | CLASE | Ubicación | Clasificación | Monedas | Riesgo
+  r1: PM | LU0130376550 | LU0130376550 | 924354 | AB AMERICAN GR | AB AMERICAN GR PFT S | 2025-06-06 00:00:00 | 2025-06-06 00:00:00 | 1900-01-02 00:00:00 | US$   | 2660 | 3073352240.14 | Fondo Mutuo o Fondo  | USD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | No aplica | No aplica | 0 | NAp | R VARIABLE | INTERNACIONAL | FONDO MUTUO O FONDO  | USD | No Reporta |  | =IF(W2="r fija",IF(O
+  r2: PO | LU0130376550 | LU0130376550 | 936131 | AB AMERICAN GR | AB AMERICAN GR PFT S | 2024-02-28 00:00:00 | 2024-02-28 00:00:00 | 1900-01-02 00:00:00 | US$   | 3841 | 4437874418.939 | Fondo Mutuo o Fondo  | USD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | No aplica | No aplica | 0 | NAp | R VARIABLE | INTERNACIONAL | FONDO MUTUO O FONDO  | USD | No Reporta |  | =IF(W3="r fija",IF(O
+  r3: CS | LU0130376550 | LU0130376550 | 936133 | AB AMERICAN GR | AB AMERICAN GR PFT S | 2025-06-06 00:00:00 | 2025-06-06 00:00:00 | 1900-01-02 00:00:00 | US$   | 198 | 228768324.642 | Fondo Mutuo o Fondo  | USD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | No aplica | No aplica | 0 | NAp | R VARIABLE | INTERNACIONAL | FONDO MUTUO O FONDO  | USD | No Reporta |  | =IF(W4="r fija",IF(O
+  r4: PC | LU0130376550 | LU0130376550 | 936135 | AB AMERICAN GR | AB AMERICAN GR PFT S | 2025-06-06 00:00:00 | 2025-06-06 00:00:00 | 1900-01-02 00:00:00 | US$   | 440 | 508374054.76 | Fondo Mutuo o Fondo  | USD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | No aplica | No aplica | 0 | NAp | R VARIABLE | INTERNACIONAL | FONDO MUTUO O FONDO  | USD | No Reporta |  | =IF(W5="r fija",IF(O
+  r5: PR | LU0130376550 | LU0130376550 | 936137 | AB AMERICAN GR | AB AMERICAN GR PFT S | 2025-06-06 00:00:00 | 2025-06-06 00:00:00 | 1900-01-02 00:00:00 | US$   | 3400 | 3928344968.6 | Fondo Mutuo o Fondo  | USD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | No aplica | No aplica | 0 | NAp | R VARIABLE | INTERNACIONAL | FONDO MUTUO O FONDO  | USD | No Reporta |  | =IF(W6="r fija",IF(O
+  r6: CS | LU1130125799 | LU1130125799 | 818961 | AB SICAV I CH A | AB STANDARD SICAV I  | 2023-05-17 00:00:00 | 2023-05-17 00:00:00 | 1900-01-02 00:00:00 | US$   | 3700 | 262930749.094 | Fondo Mutuo o Fondo  | USD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | No aplica | No aplica | 0 | NAp | R VARIABLE | INTERNACIONAL | FONDO MUTUO O FONDO  | USD | No Reporta |  | =IF(W7="r fija",IF(O
+  r7: PC | LU1130125799 | LU1130125799 | 818963 | AB SICAV I CH A | AB STANDARD SICAV I  | 2023-04-04 00:00:00 | 2023-04-04 00:00:00 | 1900-01-02 00:00:00 | US$   | 33810 | 2402618547.8022 | Fondo Mutuo o Fondo  | USD | N/A | INTERNACIONAL | R VARIABLE | VARIABLE | No aplica | No aplica | 0 | NAp | R VARIABLE | INTERNACIONAL | FONDO MUTUO O FONDO  | USD | No Reporta |  | =IF(W8="r fija",IF(O
+
+===== Calculadora Swap.xlsb :: 'MONEDA' =====
+  r0: AUD | DolarAustraliano/USD | 46212.0 | $ | 0.693956 | US$ | Dolar Americano |   | 1.0
+  r1: AUDL | Aud en Cop | 46212.0 | $ | 2293.786886 | $ | Pesos | 1.0 |  
+  r2: B01TF | Beta 0 Tes Tasa Fija | 46212.0 | % | 11.338536 |   |   | 1.0 |  
+  r3: B02TF | Beta 1 Tes Tasa Fija | 46212.0 | % | -3.50862 |   |   | 1.0 |  
+  r4: B03TF | Beta 2 Tes Tasa Fija | 46212.0 | % | 7.760573 |   |   | 1.0 |  
+  r5: B0UVR | Beta 0 UVR | 46212.0 | % | 6.046029 |   |   | 1.0 |  
+  r6: B1UVR | Beta 1 UVR | 46212.0 | % | -0.739439 |   |   | 1.0 |  
+  r7: B2UVR | Beta 2 UVR | 46212.0 | % | 2.649052 |   |   | 1.0 |  
+  r8: BBGM3 | Nota BBVAGLMK COP 07 | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r9: BBGM5 | Nota BBVAGL MK BV CO | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r10: BBGM6 | Nota BBVA GL MK BV C | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r11: BNP10 | Nota BNP Paribas BRL | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r12: BNP11 | Nota BNP Paribas COP | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r13: BNP6 | Nota BNP Paribas 150 | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r14: BNP7 | Nota BNP Paribas COP | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r15: BNP9 | Nota BNP Paribas COP | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r16: BRL | RealdeBrazil/USD | 46212.0 | $ | 5.145343 | US$ | Dolar Americano |   | 1.0
+  r17: BRLL | Brl en Cop | 46212.0 | $ | 642.402235 | $ | Pesos | 1.0 |  
+  r18: CAD | DolarCanadiense/USD | 46212.0 | $ | 1.416878 | US$ | Dolar Americano |   | 1.0
+  r19: CADL | Cad en Cop | 46212.0 | $ | 2332.861394 | $ | Pesos | 1.0 |  
+  r20: CGMH4 | Nota CGMH 08 Jul 202 | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r21: CGMH5 | Nota CGMH 03 Ago 202 | 46212.0 | % | 0.0 |   |   |   | 1.0
+  r22: CHF | FrancoSuizo/USD | 46212.0 | $ | 0.806909 | US$ | Dolar Americano |   | 1.0
+  r23: CHFL | Chf en Cop | 46212.0 | $ | 4096.349875 | $ | Pesos | 1.0 |  
+  r24: CLP | PesoChileno/USD | 46212.0 | $ | 928.99 | US$ | Dolar Americano |   | 1.0
+  r25: CLPL | Clp en Cop | 46212.0 | $ | 3.558036 | $ | Pesos | 1.0 |  
+  r26: COPC | Cad en Cop - CHR | 46212.0 | $ | 2332.861394 | $ | Pesos | 1.0 |  
+  r27: CPIL |   | 46212.0 | $ | 3615.094106 | $ | Pesos | 1.0 |  
+  r28: CTAHA | Cta Ahorro Bancafe | 46212.0 | % | 5.6 |   |   |   | 1.0
+  r29: CTAHB | Cta Ahorro Bogota | 46212.0 | % | 11.05 |   |   |   | 1.0
+
+===== Calculadora Swap.xlsb :: 'SWAPIRS_SOF' =====
+  r0: FECHA VALORACION | 46212.0
+  r2: FONDO | CS |  | FONDO | CS |  |  | IBR COMP CONOCIDA |  |  |  | 0.0 |  | Compuesto SOFR
+  r3: N° contrato | Col979701 |  | N° contrato | Col979701 |  |  | IBR COMP PROYECTADA |  |  |  | Fecha final observad | 46212.0 | 1.1798779499235856 |  | DIAS ACUM | 0.0
+  r4: FRECUENCIA | AV |  | FRECUENCIA | AV |  |  | Excepciones Non Deli | True |  |  | Próximo día habil | 46213.0 |  |  | DIAS FUT | 365.0
+  r5: MESES | 12.0 |  | MESES | 12.0 |  |  |  |  |  |  | Fecha de inicio obse | 46212.0 | 1.1798779499235856 |  | DIAS LIQ | 1.0
+
+===== Calculadora Swap.xlsb :: 'SWAPCC_COPUSD' =====
+  r0: FECHA VALORACION | 46212.0 |  |  | este es
+  r2: FONDO | 155.0 |  | FONDO | 155.0
+  r3: N° contrato | Col979438 |  | N° contrato | Col979438
+  r4: FRECUENCIA | SV |  | FRECUENCIA | SV
+  r5: MESES | 6.0 |  | MESES | 6.0
+
+===== Calculadora Swap.xlsb :: 'INICIO' =====
+  r0:  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | RUTA GUARDAR | M:\COB\Gerencia Estr
+  r1:  | Fecha | TRM | UVR   | EURL |  |  |  |  |  |  |  |  |  |  |  |  | NOMBRE GUARDAR | VPN SWAP 09-07-2026
+  r2:  | 46212.0 | 3305.38 | 415.05323725315236 | 3779.70203 |  |  |  |  |  |  |  |  |  |  |  |  |  | 46212.0
+  r3:  |  | UVR DIA NO HABIL | 415.05323725315236 |  |  |  |  |  |  |  |  |  |  |  |  |  |  | DM SWAP 09-07-2026
+  r4:  |  | IPC MENSUAL DANE  | 0.0039 | UVR DÍA 15 VIGENTE | 413.7628
+  r5:  | CURVA | NOMBRE ARCHIVO | GENERACIÓN |  |  | UBICACIÓN |  |  |  | CONTROL |  |  | Excepciones
+  r6:  |  |  |  |  |  |  |  |  |  | Valor <>0 | OK |  | BSU1ZK5D7_19
+  r7:  | DTF | SwapCC_DTF_Diaria_ | INFOVALMER>DERIVADOS |  |  | M:\COB\BDatos\INFOVA |  |  |  | Valor = #N/A | OK |  | BSU1ZK5T2_19
+
+===== Benchmark Mensual Optimizado.xlsb :: 'Clasificación' =====
+  r0: Portafolio | AFP | Nemo | ISIN | Class SFC | Emisor | F.Compra | F.Vcto   | Moneda | Valor Nominal | Valor Nominal Residu | Nro Acciones | Vr Mercado O VLR PRE | TASA FACIAL valor TA | TASA FACIAL ind | Portafolio | AFP | Nemo | ISIN | Clas SFC | Emisor | F.Compra | F.Vcto   | Moneda | Nominal Bien | Vr Mercado | TASA FACIAL | CLASE DE INVERSION | MONEDA | TASA FACIAL | UBICACION | CLASIFICACIÓN | RIESGO | VALOR TASA FACIAL |  | Precio enviado | Precio Infovalmer | Diferencia |  | Periodicidad
+  r1: PO | PROTECCIÓN |  |  | DEPVN | CITIBANK COLOMBIA    |  |  | COP |  |  |  | 397097.39 |  |  | PO | PROTECCIÓN | CITIBANK COLOMBIA | CITIBANK COLOMBIA | DEPVN | CITIBANK COLOMBIA | NA | NA | COP | 397097.39 | 397097.39 | NA | VISTA | COP | NA | NACIONAL | CAJA | No Reporta | NA |  | 1.0 | 0x2a | 0.0 |  | NA
+  r2: PR | PORVENIR |  |  | DEPVN | BANCO DE BOGOTA SA   |  |  | COP |  |  |  | 170294005317.96 |  |  | PR | PORVENIR | BANCO DE BOGOTA SA | BANCO DE BOGOTA SA | DEPVN | BANCO DE BOGOTA SA | NA | NA | COP | 170294005317.96 | 170294005317.96 | NA | VISTA | COP | NA | NACIONAL | CAJA | No Reporta | NA |  | 1.0 | 0x2a | 0.0 |  | NA
+  r3: PC | COLFONDOS |  |  | DEPVN | DAVIBANK S.A         |  |  | COP |  |  |  | 65396817416.39 |  |  | PC | COLFONDOS | DAVIBANK S.A | DAVIBANK S.A | DEPVN | DAVIBANK S.A | NA | NA | COP | 0x2a | 65396817416.39 | NA | 0x2a | COP | NA | 0x2a | 0x2a | 0x2a | 0x2a |  | 0x2a | 0x2a | 0.0 |  | NA
+  r4: PC | OLD MUTUAL |  |  | DEPVN | BANCO GNB SUDAMERIS  |  |  | COP |  |  |  | 50055599470.08 |  |  | PC | OLD MUTUAL | BANCO GNB SUDAMERIS  | BANCO GNB SUDAMERIS  | DEPVN | BANCO GNB SUDAMERIS  | NA | NA | COP | 50055599470.08 | 50055599470.08 | NA | VISTA | COP | NA | NACIONAL | CAJA | No Reporta | NA |  | 1.0 | 0x2a | 0.0 |  | NA
+  r5: PR | COLFONDOS |  |  | DEPVN | BANCO DAVIVIENDA S.A |  |  | COP |  |  |  | 15606035.09 |  |  | PR | COLFONDOS | BANCO DAVIVIENDA S.A | BANCO DAVIVIENDA S.A | DEPVN | BANCO DAVIVIENDA S.A | NA | NA | COP | 15606035.09 | 15606035.09 | NA | VISTA | COP | NA | NACIONAL | CAJA | No Reporta | NA |  | 1.0 | 0x2a | 0.0 |  | NA
+
+===== Benchmark Mensual Optimizado.xlsb :: 'Columnas' =====
+  r0: Tipo de Entidad | Código Tipo Entidad | Nombre de Entidad | Fecha de Corte | Código Tipo Patrimon | Código Patrimonio | Nombre Patrimonio | Subtipo Patrimonio | Price Vendor | Desc Price Vendor | Unidad de Captura | Renglon | Secuencia | Nro_Asignado_Por_La_ | Código PUC | Tipo_Id_Emisor | No. ID Emisor | Razon Social Emisor | Senal_Vinculado | Aval | Tipo ID Avalista | No. ID Avalista | Razon Social Avalist | No. ID Administrador | Razon Social Adminis | Clase de Inversión | Descripcion Clase In | Nemotecnico | Cupon Principal | Descripcion Cupon Pr
+  r1: Tipo de Entidad | Código Tipo Entidad | Nombre de Entidad | Fecha de Corte | Código Tipo Patrimon | Código Patrimonio | Nombre Patrimonio | Subtipo Patrimonio | Price Vendor | Desc Price Vendor | Unidad de Captura | Renglon | Secuencia | Nro_Asignado_Por_La_ | Código PUC | Tipo_Id_Emisor | No. ID Emisor | Razon Social Emisor | Senal_Vinculado | Aval | Tipo ID Avalista | No. ID Avalista | Razon Social Avalist | No. ID Administrador | Razon Social Adminis | Clase de Inversión | Descripcion Clase In | Nemotecnico | Cupon Principal | Descripcion Cupon Pr
+  r2: 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0
+  r3: Entidad | Fecha Corte | Tipo Patrimonio | SubTipo Patrimonio | Codigo Patrimonio | Nombre | Unidad captura | Subcuenta | Categoría derivado | Tipo de derivado | Tipo de opción | Número de contrato | Finalidad de la oper | Forma de liquidación | Intercambio prima | Moneda liquidación | Tipo de estrategia | Identificación estra | Ramo de seguros | Tipo contraparte | Identificación para  | Relación contraparte | Fecha celebración co | Fecha vencimiento co | Fecha liquidación co | Posición de compra o | Código moneda derech | Nominal derecho | Código moneda obliga | Nominal obligación
+  r4: Entidad | Fecha Corte | Tipo Patrimonio | SubTipo Patrimonio | Codigo Patrimonio | Nombre | Unidad captura | Subcuenta | Categoría derivado | Tipo de derivado | Tipo de opción | Número de contrato | Finalidad de la oper | Forma de liquidación | Intercambio prima | Moneda liquidación | Tipo de estrategia | Identificación estra | Ramo de seguros | Tipo contraparte | Identificación para  | Relación contraparte | Fecha celebración co | Fecha vencimiento co | Fecha liquidación co | Posición de compra o | Código moneda derech | Nominal derecho | Código moneda obliga | Nominal obligación
+  r5: 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0
