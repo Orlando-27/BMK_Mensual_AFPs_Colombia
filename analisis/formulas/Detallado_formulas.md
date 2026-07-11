@@ -1,0 +1,217 @@
+# Fórmulas clave — Benchmark (Detallado)
+
+Hojas: ['Procedimiento', 'Controles', 'Colfondos', 'Benchmark', 'Voluntarias', 'Formato de Apuestas PO-CS', 'Formato de Apuestas', 'Parametros', 'Formato de Apuestas CP', 'Opt Colfondos', 'Opt Ind', 'Cupónes Swaps', 'SWAP', 'FutLoc Industria', 'FutInt Industria', 'Fut Colf', 'Fwd Colfondos', 'Fwd Industria', 'Curvas', 'Curvas_2', 'NE', 'TASAS', 'VECTOR DE PRECIOS', 'CUF']
+
+## Benchmark
+- `B1`: `=+Procedimiento!D7`
+- `I2`: `=SUMIFS($X:$X,$A:$A,$H2,$B:$B,I$1)+N2`
+- `J2`: `=SUMIFS($X:$X,$A:$A,$H2,$B:$B,J$1)+O2`
+- `K2`: `=SUMIFS($X:$X,$A:$A,$H2,$B:$B,K$1)+P2`
+- `N2`: `=SUM('Cupónes Swaps'!$B$4:$B$1048576)`
+- `O2`: `=SUM('Cupónes Swaps'!$G$4:$G$1048576)`
+- `P2`: `=SUM('Cupónes Swaps'!$L$4:$L$1048576)`
+- `S2`: `=N2/I2`
+- `T2`: `=O2/J2`
+- `U2`: `=P2/K2`
+- `BE12`: `=+IF($M12="NOTAS ESTRUCTURADAS",IFERROR(VLOOKUP(CONCATENATE($A12,$E12),NE!$C:$W,21,0)*Colfondos!$L12,(1-VLOOKUP($E12,Parametros!$X$1:$AG$25,7,FALSE))*Colfondos!$L12),"")`
+- `L15`: `=+OFFSET('Fwd Industria'!$A$1,MATCH("POSICIÓN EN "&J15,'Fwd Industria'!$H:$H,0)-1,MATCH(B15,'Fwd Industria'!$4:$4,0)-1+MATCH(A15,'Fwd Industria'!$I$5:$M$5,0),1,1)`
+- `X15`: `=L15`
+- `Y15`: `=IFERROR(X15/L15-1,0)`
+- `Z15`: `=X15/IF(OR(B15="cesantías",B15="obligatorias"),VLOOKUP(B15,$H$9:$I$10,2,FALSE),INDEX($H$1:$K$6,MATCH(A15,$H$1:$H$6,0),MATCH(B15,$H$1:$K$1,0)))`
+- `AA15`: `=IF(OR(R15="R VARIABLE",R15="CAJA",R15="FORWARD",R15="Opciones"),0,IF(N15="NOTAS ESTRUCTURADAS",0,IF(R15="SWAP",VLOOKUP(R15&C15&IF(L15>0,"D","O"),'VECTOR DE PRECIOS'!$G:$J,2,FALSE),IFERROR(IFERROR(VLO`
+- `AB15`: `=IF(N15="Notas estructuradas",BJ15*(BF15/INDEX($H$1:$K$6,MATCH(A15,$H$1:$H$6,0),MATCH(B15,$H$1:$K$1,0))),AA15*Z15)`
+- `AC15`: `=IF(BJ15=0,"NA",IF(BJ15<CP,"CORTO PLAZO",IF(BJ15>=LP,"LARGO PLAZO","MEDIANO PLAZO")))`
+- `AD15`: `=IF(ISERROR(VLOOKUP($D15,NE!$E:$E,1,0)),IF($N15="OPCIONES",SUMIFS('Opt Ind'!AG:AG,'Opt Ind'!$V:$V,$B15,'Opt Ind'!$W:$W,$A15,'Opt Ind'!$N:$N,$J15),IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AD$14,[3`
+- `AE15`: `=IF($N15="OPCIONES",SUMIFS('Opt Ind'!AH:AH,'Opt Ind'!$V:$V,$B15,'Opt Ind'!$W:$W,$A15,'Opt Ind'!$N:$N,$J15),IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AE$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AE$14=$`
+- `AF15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AF$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AF$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AF$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AG15`: `=IF($N15="OPCIONES",SUMIFS('Opt Ind'!AI:AI,'Opt Ind'!$V:$V,$B15,'Opt Ind'!$W:$W,$A15,'Opt Ind'!$N:$N,$J15),IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AG$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AG$14=$`
+- `AH15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AH$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AH$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AH$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AI15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AI$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AI$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AI$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AJ15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AJ$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AJ$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AJ$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AK15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AK$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AK$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AK$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AL15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AL$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AL$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AL$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AM15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AM$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AM$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AM$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AN15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AN$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AN$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AN$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AO15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AO$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AO$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AO$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AP15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AP$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AP$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AP$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AQ15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AQ$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AQ$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AQ$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AR15`: `=IF(ISERROR(VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AR$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)),IF(AR$14=$O15,$X15,0),VLOOKUP($D15,[3]CPRVI!$A:$BA,MATCH(AR$14,[3]CPRVI!$A$2:$BA$2,0),FALSE)*$X15)`
+- `AS15`: `=IF(OR($N15="fondo mutuo o fondo indice"),IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AS$13,FALSE),0)*$X15,IF($N15="NOTAS ESTRUCTURADAS",$BG15*IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AS$13,FALSE),0),0))`
+- `AT15`: `=IF(N15="acciones internacionales",VLOOKUP($D15,[3]CPRVI!$A:$L,AT$13,FALSE)*$X15,(IF(OR($N15="fondo mutuo o fondo indice"),IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AT$13,FALSE),0)*$X15,IF($N15="NOTAS ESTRU`
+- `AU15`: `=IF(OR($N15="fondo mutuo o fondo indice"),IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AU$13,FALSE),0)*$X15,IF($N15="NOTAS ESTRUCTURADAS",$BG15*IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AU$13,FALSE),0),0))`
+- `AV15`: `=IF(OR($N15="fondo mutuo o fondo indice"),IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AV$13,FALSE),0)*$X15,IF($N15="NOTAS ESTRUCTURADAS",$BG15*IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AV$13,FALSE),0),0))`
+- `AW15`: `=IF(OR($N15="fondo mutuo o fondo indice"),IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AW$13,FALSE),0)*$X15,IF($N15="NOTAS ESTRUCTURADAS",$BG15*IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AW$13,FALSE),0),0))`
+- `AX15`: `=IF(OR($N15="fondo mutuo o fondo indice"),IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AX$13,FALSE),0)*$X15,IF($N15="NOTAS ESTRUCTURADAS",$BG15*IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AX$13,FALSE),0),0))`
+- `AY15`: `=IF(OR($N15="fondo mutuo o fondo indice"),IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AY$13,FALSE),0)*$X15,IF($N15="NOTAS ESTRUCTURADAS",$BG15*IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AY$13,FALSE),0),0))`
+- `AZ15`: `=IF(OR($N15="fondo mutuo o fondo indice"),IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AZ$13,FALSE),0)*$X15,IF($N15="NOTAS ESTRUCTURADAS",$BG15*IFERROR(VLOOKUP($D15,[3]CPRVI!$A:$L,AZ$13,FALSE),0),0))`
+- `BA15`: `=IF(OR(N15="Acciones Colombia",N15="FIC ACC. COL."),VLOOKUP(D15,'[3]CLAS ACCIONES'!$A:$B,2,FALSE),"NA")`
+- `BB15`: `=IF(N15="vista",IF(F15="cca","Carteras Colectivas","vista"),"NA")`
+- `BC15`: `=IF(AND(Q15="INTERNACIONAL",R15="R FIJA"),IFERROR(VLOOKUP(E15,[3]CLASIFICACION!$A:$O,15,FALSE),VLOOKUP(D15,[3]CLASIFICACION!$A:$O,15,FALSE)),"")`
+- `BD15`: `=IF(U15=W15,"No Valorado","Valorado")`
+- `BF15`: `=IF($N15="NOTAS ESTRUCTURADAS",IFERROR(VLOOKUP(CONCATENATE($A15,$E15),NE!$A:$U,21,0)*X15,IFERROR(1-VLOOKUP($E15,Parametros!$X$1:$AG$25,7,FALSE)*X15,"")),"")`
+- `BG15`: `=IFERROR(VLOOKUP(A15&D15,NE!A:J,10,0),0)`
+- `BH15`: `=IF(BG15="","",IF((I15-Procedimiento!$D$7)/365<CP,"CORTO PLAZO",IF((I15-Procedimiento!$D$7)/365>=LP,"LARGO PLAZO","MEDIANO PLAZO")))`
+- `BI15`: `=X15-SUM(AD15:AQ15)`
+- `BJ15`: `=+IF(OR(R15="FORWARD",R15="R VARIABLE",R15="CAJA",R15="OPCIONES",R15="REPO"),0,IFERROR(VLOOKUP(D15,Parametros!$AW:$AX,2,0),(I15-$B$1)/365))`
+- `BK15`: `=IFERROR(_xlfn.XLOOKUP(D15,NE!$E:$E,NE!$G:$G,,0),0)`
+- `BL15`: `=IFERROR(_xlfn.XLOOKUP(D15,NE!$E:$E,NE!$N:$N,,0),0)`
+- `BN15`: `=+VLOOKUP(E15,[4]Duracion_Indexado_Precia!$B:$D,3,0)`
+- `BO15`: `=+IF(ISERROR(BN15),IF(OR(R15="R VARIABLE",R15="CAJA",R15="FORWARD",R15="Opciones"),0,IF(N15="NOTAS ESTRUCTURADAS",0,IF(R15="SWAP",IF(D15&Q15="SWAP TFNACIONAL",SWAPTF(I15,T15,V15,$B$1,O15,K15,1),IF(D15`
+- `BQ15`: `=IFERROR(IF(AND(OR(R15="r fija",R15="swap"),N15<>"vista",N15<>"money market"),IF(OR(V15="T",V15="S",V15="A"),COUPPCD($B$1,I15,IF(V15="T",4,IF(V15="s",2,1))),IF(V15="M",DATE(YEAR($B$1),MONTH($B$1),DAY(`
+- `BR15`: `=IF(AND(OR(R15="r fija",R15="swap"),N15<>"vista",N15<>"money market"),IF(BT15=Fecha_Valoración,(T15+IFERROR(VLOOKUP(M15,Parametros!$BK$9:$BL$13,2,0),0))/VLOOKUP(V15,Parametros!$BK$15:$BM$21,3,0)*K15*V`
+- `BT15`: `=IFERROR((IF(BQ15=_xlfn.XLOOKUP(BQ15,BS:BS,BS:BS,,0),WORKDAY(BQ15,1,$BS$15:$BS$748),BQ15)),BQ15)`
+- `BU15`: `=IF(BR15=FALSE,0,Z15)`
+
+## SWAP
+- `W2`: `=IF(LEN(TRIM(T2))=4,LEFT(T2,2),LEFT(T2,3))`
+- `X3`: `=IF(E3=M3,"IRS","CCS")`
+- `Y3`: `=IF(X3="IRS",(E3*VLOOKUP(H3,'VECTOR DE PRECIOS'!$S$1:$T$13,2,FALSE))/(1+IF(H3="COP",SUMIFS(Curvas!E:E,Curvas!C:C,"FWTCOP",Curvas!D:D,B3-Fecha_Valoración),SUMIFS(Curvas!E:E,Curvas!C:C,"LIBBTS",Curvas!D`
+- `Z3`: `=IF(X3="IRS",-((E3*VLOOKUP(H3,'VECTOR DE PRECIOS'!$S$1:$T$13,2,FALSE))/(1+IF(H3="COP",SUMIFS(Curvas!E:E,Curvas!C:C,"FWTCOP",Curvas!D:D,B3-Fecha_Valoración),SUMIFS(Curvas!E:E,Curvas!C:C,"LIBBTS",Curvas`
+- `AA3`: `=IF(OR(H3="cop",H3="uvr"),"NACIONAL","INTERNACIONAL")`
+- `AB3`: `=IF(OR(P3="cop",P3="uvr"),"NACIONAL","INTERNACIONAL")`
+- `AC3`: `=IF(MID(C3,6,2)="TF","TASA FIJA",IF(MID(C3,6,2)="TV","VARIABLE","INFLACIÓN"))`
+- `AD3`: `=IF(MID(K3,6,2)="TF","TASA FIJA",IF(MID(K3,6,2)="TV","VARIABLE","INFLACIÓN"))`
+- `AE3`: `=IFERROR(IF(ISNUMBER(MID(F3,1,5)*1),MID(F3,1,5)*1,IF(ISNUMBER(MID(F3,6,4)*1)=FALSE,MID(F3,6,1)*1,IF(ISNUMBER(MID(F3,6,4)*1)=TRUE,MID(F3,6,4),0)))/100,0)`
+- `AF3`: `=IFERROR(IF(ISNUMBER(MID(N3,1,5)*1),MID(N3,1,5)*1,IF(ISNUMBER(MID(N3,6,4)*1)=FALSE,MID(N3,6,1)*1,IF(ISNUMBER(MID(N3,6,4)*1)=TRUE,MID(N3,6,4),0)))/100,0)`
+- `AG3`: `=IF(AND(X3="IRS",C3="SWAP TF"),Y3+Z3,0)`
+- `AH3`: `=IF(AND(X3="IRS",K3="SWAP TF"),Y3+Z3,0)`
+- `AI3`: `=VLOOKUP(G3,Parametros!$E$1:$F$7,2,FALSE)`
+- `AJ3`: `=VLOOKUP(O3,Parametros!$E$1:$F$7,2,FALSE)`
+- `AK3`: `=+VLOOKUP($D3,[5]DICCIONARIO!$E:$F,2,0)`
+- `AL3`: `=+VLOOKUP($L3,[5]DICCIONARIO!$E:$F,2,0)`
+- `AM3`: `=VLOOKUP(D3,Colfondos!D:L,9,FALSE)-Y3`
+- `AN3`: `=VLOOKUP(L3,Colfondos!D:L,9,FALSE)-Z3`
+
+## NE
+- `CV1`: `=#REF!`
+- `Z2`: `=IFERROR(_xlfn.XLOOKUP(E2,Benchmark!$E:$E,Benchmark!$B:$B,,0),"COLFONDOS")`
+- `AA2`: `=SUMIFS(Colfondos!$AB:$AB,Colfondos!$A:$A,NE!D2,Colfondos!$C:$C,NE!E2)`
+- `AB2`: `=AA2/SUMIFS($AA$2:$AA$26,$Z$2:$Z$26,Z2,$D$2:$D$26,D2,$G$2:$G$26,G2)`
+- `AC2`: `=AB2*N2`
+- `AD2`: `=+AA2/SUMIFS($AA$2:$AA$26,$Z$2:$Z$26,Z2,$D$2:$D$26,D2)`
+- `AE2`: `=AD2*N2`
+- `AF2`: `=YEAR(_xlfn.XLOOKUP(E2,Colfondos!C:C,Colfondos!I:I,,0))`
+- `AG2`: `=+_xlfn.XLOOKUP(E2,Colfondos!C:C,Colfondos!N:N,,0)`
+- `X28`: `=IFERROR(_xlfn.XLOOKUP(E28,Benchmark!$E:$E,Benchmark!$N:$N,,0),"1")`
+- `AJ28`: `=+SUMIFS($AA$28:$AA$110,$G$28:$G$110,$AI28,$Z$28:$Z$110,AJ$27)`
+- `AK28`: `=+SUMIFS($AA$28:$AA$110,$G$28:$G$110,$AI28,$Z$28:$Z$110,AK$27)`
+- `AL28`: `=+SUMIFS($AA$28:$AA$110,$G$28:$G$110,$AI28,$Z$28:$Z$110,AL$27)`
+
+## Fwd Industria
+- `I6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,I$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,I$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,I$5,$G:$G,"BUY"`
+- `J6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,J$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,J$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,J$5,$G:$G,"BUY"`
+- `K6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,K$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,K$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,K$5,$G:$G,"BUY"`
+- `L6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,L$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,L$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,L$5,$G:$G,"BUY"`
+- `M6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,M$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,M$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$H$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,M$5,$G:$G,"BUY"`
+- `W6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,W$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,W$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,W$5,$G:$G,"BUY"`
+- `X6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,X$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,X$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,X$5,$G:$G,"BUY"`
+- `Y6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,Y$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,Y$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,Y$5,$G:$G,"BUY"`
+- `Z6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,Z$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,Z$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,Z$5,$G:$G,"BUY"`
+- `AA6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,AA$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AA$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$V$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AA$5,$G:$G,"B`
+- `AK6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,AK$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AK$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AK$5,$G:$G,`
+- `AL6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,AL$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AL$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AL$5,$G:$G,`
+- `AM6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,AM$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AM$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AM$5,$G:$G,`
+- `AN6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,AN$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AN$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AN$5,$G:$G,`
+- `AO6`: `=SUMIFS($M:$M,$AF:$AF,"USD",$P:$P,AO$5,$G:$G,"BUY",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AO$5,$G:$G,"SELL",$Q:$Q,"COP",$AG:$AG,$AJ$4)-SUMIFS($N:$N,$AF:$AF,"USD",$P:$P,AO$5,$G:$G,`
+- `E7`: `=+Curvas!$AM$6`
+- `F7`: `=+Curvas!$AL$6`
+- `AS9`: `=SUMIFS($W:$W,$P:$P,AS$8,$S:$S,$AR9,$AG:$AG,$AS$7)`
+- `AT9`: `=SUMIFS($W:$W,$P:$P,AT$8,$S:$S,$AR9,$AG:$AG,$AS$7)`
+- `AU9`: `=SUMIFS($W:$W,$P:$P,AU$8,$S:$S,$AR9,$AG:$AG,$AS$7)`
+- `AV9`: `=SUMIFS($W:$W,$P:$P,AV$8,$S:$S,$AR9,$AG:$AG,$AS$7)`
+- `AW9`: `=SUMIFS($W:$W,$P:$P,AW$8,$S:$S,$AR9,$AG:$AG,$AS$7)`
+- `AX9`: `=SUMIFS($W:$W,$P:$P,AX$8,$S:$S,$AR9,$AG:$AG,$AX$7)`
+- `AY9`: `=SUMIFS($W:$W,$P:$P,AT$8,$S:$S,$AR9,$AG:$AG,$AX$7)`
+- `AZ9`: `=SUMIFS($W:$W,$P:$P,AU$8,$S:$S,$AR9,$AG:$AG,$AX$7)`
+- `BA9`: `=SUMIFS($W:$W,$P:$P,AV$8,$S:$S,$AR9,$AG:$AG,$AX$7)`
+- `BB9`: `=SUMIFS($W:$W,$P:$P,AW$8,$S:$S,$AR9,$AG:$AG,$AX$7)`
+- `BC9`: `=SUMIFS($W:$W,$P:$P,BC$8,$S:$S,$AR9,$AG:$AG,$BC$7)`
+- `BD9`: `=SUMIFS($W:$W,$P:$P,BD$8,$S:$S,$AR9,$AG:$AG,$BC$7)`
+- `BE9`: `=SUMIFS($W:$W,$P:$P,BE$8,$S:$S,$AR9,$AG:$AG,$BC$7)`
+- `BF9`: `=SUMIFS($W:$W,$P:$P,BF$8,$S:$S,$AR9,$AG:$AG,$BC$7)`
+- `BG9`: `=SUMIFS($W:$W,$P:$P,BG$8,$S:$S,$AR9,$AG:$AG,$BC$7)`
+- `BK9`: `=SUMIFS($W:$W,$P:$P,BK$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"")`
+- `BL9`: `=SUMIFS($W:$W,$P:$P,BL$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"")`
+- `BM9`: `=SUMIFS($W:$W,$P:$P,BM$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"")`
+- `BN9`: `=SUMIFS($W:$W,$P:$P,BN$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"")`
+- `BO9`: `=SUMIFS($W:$W,$P:$P,BO$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"")`
+- `BP9`: `=SUMIFS($W:$W,$P:$P,BP$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"")`
+- `BQ9`: `=SUMIFS($W:$W,$P:$P,BQ$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"")`
+- `BR9`: `=SUMIFS($W:$W,$P:$P,BR$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"")`
+- `BS9`: `=SUMIFS($W:$W,$P:$P,BS$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"")`
+- `BT9`: `=SUMIFS($W:$W,$P:$P,BT$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"")`
+- `BU9`: `=SUMIFS($W:$W,$P:$P,BU$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"")`
+- `BV9`: `=SUMIFS($W:$W,$P:$P,BV$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"")`
+- `BW9`: `=SUMIFS($W:$W,$P:$P,BW$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"")`
+- `BX9`: `=SUMIFS($W:$W,$P:$P,BX$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"")`
+- `BY9`: `=SUMIFS($W:$W,$P:$P,BY$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"")`
+- `CC9`: `=SUMIFS($W:$W,$P:$P,CC$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"TRM")`
+- `CD9`: `=SUMIFS($W:$W,$P:$P,CD$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"TRM")`
+- `CE9`: `=SUMIFS($W:$W,$P:$P,CE$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"TRM")`
+- `CF9`: `=SUMIFS($W:$W,$P:$P,CF$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"TRM")`
+- `CG9`: `=SUMIFS($W:$W,$P:$P,CG$8,$S:$S,$AR9,$AG:$AG,$AS$7,$AH:$AH,"TRM")`
+- `CH9`: `=SUMIFS($W:$W,$P:$P,CH$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"TRM")`
+- `CI9`: `=SUMIFS($W:$W,$P:$P,CI$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"TRM")`
+- `CJ9`: `=SUMIFS($W:$W,$P:$P,CJ$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"TRM")`
+- `CK9`: `=SUMIFS($W:$W,$P:$P,CK$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"TRM")`
+- `CL9`: `=SUMIFS($W:$W,$P:$P,CL$8,$S:$S,$AR9,$AG:$AG,$AX$7,$AH:$AH,"TRM")`
+- `CM9`: `=SUMIFS($W:$W,$P:$P,CM$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"TRM")`
+- `CN9`: `=SUMIFS($W:$W,$P:$P,CN$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"TRM")`
+- `CO9`: `=SUMIFS($W:$W,$P:$P,CO$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"TRM")`
+- `CP9`: `=SUMIFS($W:$W,$P:$P,CP$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"TRM")`
+- `CQ9`: `=SUMIFS($W:$W,$P:$P,CQ$8,$S:$S,$AR9,$AG:$AG,$BC$7,$AH:$AH,"TRM")`
+
+## FutInt Industria
+- `S1`: `=E1`
+- `T1`: `=IF(F1="INDICE",G1,G1)`
+- `V1`: `=+O1*IF(M1="COMPRA",1,-1)`
+- `W1`: `=L1`
+- `X1`: `=IF(NOT(ISERROR(VLOOKUP(LEFT(U1,LEN(U1)-3)&UPPER(TEXT(EOMONTH(W1,1),"MMM")),'VECTOR DE PRECIOS'!A:B,2,0))),LEFT(U1,LEN(U1)-3)&UPPER(TEXT(EOMONTH(W1,1),"MMM")),IF(NOT(ISERROR(VLOOKUP(LEFT(U1,LEN(U1)-3)`
+- `Y1`: `=IF(F1="TREASURY",_xlfn.XLOOKUP(G1,'VECTOR DE PRECIOS'!A:A,'VECTOR DE PRECIOS'!B:B,,0),IF(G1="S&P 500",_xlfn.XLOOKUP("SPX Index",'VECTOR DE PRECIOS'!A:A,'VECTOR DE PRECIOS'!B:B,,0),IF('FutInt Industri`
+- `Z1`: `=N1`
+- `AA1`: `=IFERROR(Y1,Z1)`
+- `AB1`: `=G1`
+- `AC1`: `=VLOOKUP(J1,Curvas!$AC$18:$AE$30,3,0)`
+- `AD1`: `=IF(S1="NA",0,V1*AC1*IF(F1="INDICE",AA1,IF(LEFT(F1,5)="Treas",IF(ROUND(MID(AA1,1,1),0)>1,AA1/100,AA1))))`
+- `AF1`: `=IF(OR(S1="NA",T1="FUT-TRM"),"",AD1/INDEX(Benchmark!$I$2:$K$6,MATCH(S1,Benchmark!$H$2:$H$6,0),MATCH(R1,Benchmark!$I$1:$K$1,0)))`
+- `AG1`: `=IF(OR(S1="NA",F1="INDICE"),"",AF1*AE1)`
+- `AH1`: `=IF(F1="Indice",VLOOKUP('FutInt Industria'!T1,Parametros!$BA$25:$BD$43,4,0),IF(AJ1<CP,"CORTO PLAZO",IF(AJ1>=LP,"LARGO PLAZO","MEDIANO PLAZO")))`
+- `AJ1`: `=IF(F1="Indice",0,(AI1-Fecha_Valoración)/365)`
+- `AK1`: `=_xlfn.XLOOKUP(AB1,Parametros!$BK$4:$BP$4,Parametros!$BK$5:$BP$5,,0)*AF1`
+
+## FutLoc Industria
+- `O2`: `=F2`
+- `Q2`: `=I2`
+- `R2`: `=K2*IF(TRIM(B2)="1",1,-1)`
+- `S2`: `=M2`
+- `T2`: `=IF(NOT(ISERROR(VLOOKUP(LEFT(Q2,LEN(Q2)-3)&UPPER(TEXT(EOMONTH(S2,1),"MMM")),'VECTOR DE PRECIOS'!A:B,2,0))),LEFT(Q2,LEN(Q2)-3)&UPPER(TEXT(EOMONTH(S2,1),"MMM")),IF(NOT(ISERROR(VLOOKUP(LEFT(Q2,LEN(Q2)-3)`
+- `U2`: `=VLOOKUP(Q2,'VECTOR DE PRECIOS'!$A:$B,2,0)`
+- `V2`: `=IFERROR(VLOOKUP(T2,'VECTOR DE PRECIOS'!$A:$B,2,0),VLOOKUP(X2,'VECTOR DE PRECIOS'!$1:$1048576,2,0)*100)`
+- `W2`: `=IFERROR(U2,V2)`
+- `X2`: `=Q2`
+- `Y2`: `=IF(O2="NA",0,R2*IF(P2="FUT-TRM",W2,IF(P2="FUT-TES",V2/100)))`
+- `Z2`: `=IF(X2="FWD","",VLOOKUP(X2,'VECTOR DE PRECIOS'!G:H,2,0))`
+- `AA2`: `=IF(OR(O2="NA",P2="FUT-TRM"),"",Y2/INDEX(Benchmark!$I$2:$K$6,MATCH(O2,Benchmark!$H$2:$H$6,0),MATCH(N2,Benchmark!$I$1:$K$1,0)))`
+- `AB2`: `=IF(OR(O2="NA",P2="FUT-TRM"),"",AA2*Z2)`
+- `AC2`: `=IF(AF2="","",IF(AF2<CP,"CORTO PLAZO",IF(AF2>=LP,"LARGO PLAZO","MEDIANO PLAZO")))`
+- `AD2`: `=IFERROR(_xlfn.XLOOKUP(X2,Colfondos!C:C,Colfondos!B:B,,0),IFERROR(_xlfn.XLOOKUP('FutLoc Industria'!X2,Benchmark!E:E,Benchmark!D:D,,0),0))`
+- `AE2`: `=IFERROR(_xlfn.XLOOKUP(AD2,Colfondos!B:B,Colfondos!I:I,,0),_xlfn.XLOOKUP(AD2,Benchmark!D:D,Benchmark!I:I,,0))`
+- `AF2`: `=(AE2-Fecha_Valoración)/365`
+
+## Cupónes Swaps
+- `A3`: `=Fecha_Valoración`
+- `B3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,B$1,Benchmark!$B:$B,B$2)`
+- `C3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,C$1,Benchmark!$B:$B,C$2)`
+- `D3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,D$1,Benchmark!$B:$B,D$2)`
+- `E3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,E$1,Benchmark!$B:$B,E$2)`
+- `F3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,F$1,Benchmark!$B:$B,F$2)`
+- `G3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,G$1,Benchmark!$B:$B,G$2)`
+- `H3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,H$1,Benchmark!$B:$B,H$2)`
+- `I3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,I$1,Benchmark!$B:$B,I$2)`
+- `J3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,J$1,Benchmark!$B:$B,J$2)`
+- `K3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,K$1,Benchmark!$B:$B,K$2)`
+- `L3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,L$1,Benchmark!$B:$B,L$2)`
+- `M3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,M$1,Benchmark!$B:$B,M$2)`
+- `N3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,N$1,Benchmark!$B:$B,N$2)`
+- `O3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,O$1,Benchmark!$B:$B,O$2)`
+- `P3`: `=SUMIFS(Benchmark!$BR:$BR,Benchmark!$N:$N,"swap",Benchmark!$A:$A,P$1,Benchmark!$B:$B,P$2)`
