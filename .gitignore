@@ -22,3 +22,7 @@ venv/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Salidas generadas (datos)
+salidas/
+insumos/

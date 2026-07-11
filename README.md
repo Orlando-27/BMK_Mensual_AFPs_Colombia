@@ -10,8 +10,44 @@ Superintendencia Financiera de Colombia (SFC).
 
 ## Estado
 
-Fase de **análisis y diseño** (no hay código de producción todavía). Se reimplementará en Python,
-para correr en nube (sin Excel ni unidad de red `M:\`).
+Pipeline **end-to-end funcionando** en Python (nube, sin Excel ni `M:\`), verificado contra el corte
+real de **junio 2026** descargado de la SFC.
+
+## Cómo correr
+
+```bash
+pip install -r requirements.txt
+
+# Corte del mes (descarga de la SFC + procesa + genera salidas y alertas)
+python3 -m bmk.run_monthly --mes Junio --anio 2026
+
+# O procesando un insumo ya descargado, y valorando swaps con un corte de curvas:
+python3 -m bmk.pipeline --archivo insumos/sfc/2026_06portainvdeta.xls \
+    --swaps-insumos <carpeta con INICIO_*, SWAPIND_*, curva_*>
+```
+
+Salidas por corte en `salidas/AAAA-MM-DD/`:
+- `consolidado_benchmark_*.xlsx` — valor por fondo, por clase de inversión, por clasificación,
+  swaps por tipo, forwards por par, valoración de swaps.
+- `alertas_*.xlsx` / `.json` — instrumentos nuevos, códigos SFC desconocidos, controles.
+- `resumen.json` — bitácora y resumen del corte.
+
+## Arquitectura del pipeline (`bmk/`)
+
+| Etapa | Módulo | Función |
+|---|---|---|
+| Ingesta | `ingest/sfc.py` | Descarga y lee el Portafolio SFC (351/415/CSA). |
+| Normalización | `prepare/normalize.py` | Extrae activos, normaliza AFP y portafolio. |
+| Clasificación | `classify/classifier.py` | Resuelve clase/moneda/ubicación/riesgo (3 niveles). |
+| Detector | `classify/detector.py` | Alerta instrumentos nuevos y códigos SFC nuevos. |
+| Derivados | `derivatives/{router,forwards,swaps}.py` | Enruta 415, forwards, tipo de swap. |
+| Valoración | `pricing/` | Motor de swaps v6 (validado <2% vs Precia). |
+| Consolidación | `consolidate/{benchmark,reconcile}.py` | Posiciones, pesos, controles. |
+| Salidas | `output/excel.py` | Consolidado Excel. |
+| Alertas | `alerts/registry.py` | Registro transversal -> Excel/JSON. |
+| Orquestación | `pipeline.py`, `run_monthly.py` | Encadena todo; entrada mensual. |
+
+> El proceso manual completo, el diagnóstico y las fórmulas están documentados abajo.
 
 ## Documentación
 
