@@ -8,6 +8,8 @@ insumos/
 analisis/sheets/
 # (los dumps de VBA en analisis/vba/ y los .md destilados sí pueden versionarse
 #  selectivamente con `git add -f` cuando sirvan de especificación)
+analisis/vba/*.cls.vba
+analisis/inspect.log
 
 # Python
 __pycache__/
