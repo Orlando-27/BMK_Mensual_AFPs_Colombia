@@ -100,6 +100,22 @@ def cargar_fallback(ref_dir: str | Path = "bmk/config/reference") -> dict:
     return fb
 
 
+def cargar_clase_a_bucket(ref_dir: str | Path = "bmk/config/reference") -> tuple[dict, dict]:
+    """clase_inversion -> (clasificacion, ubicacion) mas frecuente en la referencia.
+
+    Permite completar los buckets (R FIJA / R VARIABLE / CAJA y NACIONAL/INTERNAC.)
+    de los activos resueltos solo por la leyenda de clas_sfc.
+    """
+    df = pd.read_csv(Path(ref_dir) / "clasificacion.csv", dtype=str).fillna("")
+    clasif, ubic = {}, {}
+    for col_dst, target in (("clasificacion", clasif), ("ubicacion", ubic)):
+        modo = (df[df[col_dst] != ""]
+                .groupby("clase_inversion")[col_dst]
+                .agg(lambda s: s.value_counts().idxmax()))
+        target.update(modo.to_dict())
+    return clasif, ubic
+
+
 def cargar_legend_unica(ref_dir: str | Path = "bmk/config/reference") -> dict:
     """clas_sfc -> clase_inversion cuando el codigo mapea a UNA sola clase.
 
@@ -154,4 +170,14 @@ def clasificar(activos: pd.DataFrame, ref_dir: str | Path = "bmk/config/referenc
     for campo in ("clase_inversion", "ubicacion", "clasificacion", "riesgo"):
         out[campo] = [pick(p, s, t, campo)
                       for p, s, t in zip(primario, secundario, terciario)]
+
+    # Completar bucket (clasificacion/ubicacion) para los resueltos por leyenda,
+    # derivandolo de la clase_inversion segun la referencia.
+    clasif_map, ubic_map = cargar_clase_a_bucket(ref_dir)
+    falta_clasif = out["is_clasificado"] & (out["clasificacion"].isin(["", "ND"]))
+    out.loc[falta_clasif, "clasificacion"] = out.loc[falta_clasif, "clase_inversion"].map(
+        clasif_map).fillna(out.loc[falta_clasif, "clasificacion"])
+    falta_ubic = out["is_clasificado"] & (out["ubicacion"].isin(["", "ND"]))
+    out.loc[falta_ubic, "ubicacion"] = out.loc[falta_ubic, "clase_inversion"].map(
+        ubic_map).fillna(out.loc[falta_ubic, "ubicacion"])
     return out
