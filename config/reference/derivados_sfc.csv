@@ -1,0 +1,27 @@
+codigo,tipo_derivado
+1.0,Forward de divisas
+2.0,Forward de títulos
+3.0,Forward de valores
+4.0,Futuro de divisas
+5.0,Futuro de títulos
+6.0,Futuro de valores
+7.0,Opción europea
+8.0,Opción americana
+9.0,Opción down and in
+10.0,Opción down and out
+11.0,Opción up and in
+12.0,Opción up and out
+13.0,Opción de brecha
+14.0,Opción in and out
+15.0,Opción asiática / asiática in and out
+16.0,Swap IRS
+17.0,Swap CCS
+18.0,Credit Default Swaps
+19.0,Asset Swap
+20.0,Futuros de tasa de interés
+21.0,FRA's
+22.0,Opción de acumulación Banrep
+23.0,Opción de desacumulación Banrep
+24.0,Opción de volatilidad Banrep
+25.0,Forward sobre Materias Primas
+26.0,Futuros sobre Materias Primas
