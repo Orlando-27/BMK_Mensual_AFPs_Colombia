@@ -1,0 +1,22 @@
+# Archivos Excel pesados / insumos — NO se versionan en git
+*.xlsb
+*.xlsm
+*.xlsx
+*.xls
+~$*
+insumos/
+analisis/sheets/
+# (los dumps de VBA en analisis/vba/ y los .md destilados sí pueden versionarse
+#  selectivamente con `git add -f` cuando sirvan de especificación)
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.egg-info/
+
+# Sistema
+.DS_Store
+Thumbs.db

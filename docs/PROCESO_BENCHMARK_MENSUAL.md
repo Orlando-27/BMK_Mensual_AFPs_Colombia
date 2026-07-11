@@ -343,7 +343,29 @@ Estos son los cuellos de botella de la automatización — no son mecánicos:
 
 ---
 
-## 12. Preguntas abiertas
-Ver conversación / sección de preguntas. Este documento se actualizará a medida que se resuelvan.
+## 12. Decisiones de diseño (acordadas)
 
-_Última actualización: análisis inicial del manual V1.0._
+| Tema | Decisión |
+|---|---|
+| **Estrategia** | **Reimplementar en Python** toda la lógica del proceso, independiente de Excel/VBA. |
+| **Entorno de ejecución** | **Servidor/nube, sin Excel ni unidad de red `M:\`.** Las rutas `M:\...` se sustituyen por almacenamiento configurable (local/objeto). No se orquesta Excel. |
+| **Alcance** | **Pipeline end-to-end** (bloques 1 a 10). Se construirá por módulos pero apuntando al proceso completo. |
+| **Fuente de la lógica** | Los 5 Excel-herramienta (con macros VBA) son la **especificación**: se extrae el VBA y la estructura de hojas para replicar reglas y cálculos en Python. |
+| **Artefactos en el repo** | En GitHub van los **artefactos destilados** (código Python, dumps de VBA en texto, mapas de columnas, CSV de muestra), **no** los `.xlsb` pesados. |
+
+### Implicaciones técnicas
+- Sin `M:\` ni Excel: toda lectura/escritura de datos se hace con librerías Python
+  (`pandas`, `openpyxl`, `pyxlsb`, `xlsxwriter`) y rutas parametrizadas por configuración.
+- `.xlsb` → valores legibles con `pyxlsb` (solo valores, no evalúa fórmulas); VBA extraíble con
+  `oletools`/`olevba`. Para leer **fórmulas** como texto conviene una copia `.xlsm`/`.xlsx`.
+- Las macros VBA definen la lógica real (importación, clasificación, valoración): **primer objetivo de
+  análisis** antes de codificar.
+
+## 13. Preguntas abiertas / pendientes
+- Confirmar los **5 archivos** exactos y su rol (hipótesis: BMO, Calculadora Swap, Sensibilidad_Fwds,
+  INICIO MACRO MULTIFONDOS, Benchmark Detallado).
+- Definir el **almacenamiento** que reemplaza `M:\` en el entorno de nube (GCS bucket, etc.).
+- Método de **entrega de insumos** SFC en producción (¿descarga automática o carga manual?).
+- Cómo se resolverán en producción los **insumos externos** (diccionario Renta Variable, term sheets).
+
+_Última actualización: decisiones de estrategia/entorno/alcance acordadas._
