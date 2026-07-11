@@ -25,7 +25,7 @@ from bmk.prepare import normalize
 from bmk.classify import classifier, detector
 from bmk.derivatives import router, forwards, swaps as swp
 from bmk.consolidate import benchmark, reconcile
-from bmk.output import excel
+from bmk.output import excel, hoja_benchmark
 from bmk.alerts.registry import RegistroAlertas
 
 
@@ -109,6 +109,10 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
     ruta_xlsx = excel.escribir_consolidado(cfg.dir_corte(), cfg.corte, hojas)
     paso(f"Consolidado: {ruta_xlsx}")
 
+    # Hoja Benchmark para importar en la herramienta diaria (solo datos; formulas vacias)
+    ruta_hoja = hoja_benchmark.escribir(clas, cfg.dir_corte(), cfg.corte)
+    paso(f"Hoja Benchmark (importar): {ruta_hoja}")
+
     alert_out = reg.escribir(cfg.dir_corte())
     paso(f"Alertas: {alert_out['n']} -> {alert_out['xlsx']}")
 
@@ -118,7 +122,7 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
         "deteccion": det, "derivados": {"forwards": len(fwd), "swaps": len(sw)},
         "consolidacion": {k: v for k, v in ctrl.items() if k != "fondos"},
         "alertas": reg.resumen(),
-        "salidas": {"consolidado": ruta_xlsx, **alert_out},
+        "salidas": {"consolidado": ruta_xlsx, "hoja_benchmark": ruta_hoja, **alert_out},
         "log": log,
     }
     (cfg.dir_corte() / "resumen.json").write_text(
