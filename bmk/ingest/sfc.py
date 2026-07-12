@@ -26,7 +26,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
-import requests
 
 # Pagina de publicaciones del Portafolio de Inversion Detallado (pension obligatoria).
 PUBLICACION_PO = (
@@ -67,7 +66,8 @@ class ArchivoSFC:
     ruta: Path
 
 
-def _get(url: str, **kw) -> requests.Response:
+def _get(url: str, **kw):
+    import requests  # solo se necesita para descargar de la SFC, no para leer local
     r = requests.get(url, timeout=kw.pop("timeout", 180), allow_redirects=True, **kw)
     r.raise_for_status()
     return r
