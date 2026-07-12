@@ -51,6 +51,33 @@ def valorar(formato_415: pd.DataFrame, vector_path: str | Path = "insumos/vector
     return local, intl
 
 
+# Rotulos calcados de la hoja "FutLoc Industria" -> campo interno.
+FUTLOC_COLS = [
+    ("Posición Compra o venta", "posicion"), ("NOMBRE TITULAR", "portafolio"),
+    ("SUBYACENTE", "subyacente"), ("NOMINAL", "nominal"), ("Vencimiento", "fecha_vencimiento"),
+    ("Fondo", "afp"), ("Portafolio", "portafolio"), ("NEMO", "tipo_nemo"),
+    ("Precio Usar", "precio_vector"), ("Valor de Mercado", "valor_mercado"),
+]
+# Rotulos calcados de la hoja "FutInt Industria" -> campo interno.
+FUTINT_COLS = [
+    ("Portafolio", "portafolio"),
+    ("Tipo de subyacente (índice, opción, tasa de cambio, tasa de interés, título)", "tipo"),
+    ("Subyacente específico", "subyacente"), ("Posición de Compra o de Venta", "posicion"),
+    ("Moneda del Contrato", "moneda"), ("Nominal", "nominal"),
+    ("Precio del Futuro fecha de valoración", "precio_vector"),
+    ("Utilidad o Pérdida en COP acumulada hasta fecha valoración", "valor_mercado_cop"),
+    ("Fondo", "afp"),
+]
+
+
+def _con_rotulos(df: pd.DataFrame, cols) -> pd.DataFrame:
+    if df is None or df.empty:
+        return pd.DataFrame(columns=[h for h, _ in cols])
+    d = df.copy()
+    d["tipo_nemo"] = "FUT-TES"
+    return pd.DataFrame({h: (d[c] if c in d.columns else "") for h, c in cols})
+
+
 def escribir(formato_415: pd.DataFrame, out_dir: str | Path, corte: str,
              vector_path: str | Path = "insumos/vector_precios.csv",
              fx: dict | None = None, solo_industria: bool = True) -> str:
@@ -59,6 +86,6 @@ def escribir(formato_415: pd.DataFrame, out_dir: str | Path, corte: str,
     local, intl = valorar(formato_415, vector_path, fx, solo_industria)
     dest = out_dir / f"valoracion_futuros_industria_{corte}.xlsx"
     with pd.ExcelWriter(dest, engine="xlsxwriter") as xw:
-        local.to_excel(xw, sheet_name="FutLoc Industria", index=False)
-        intl.to_excel(xw, sheet_name="FutInt Industria", index=False)
+        _con_rotulos(local, FUTLOC_COLS).to_excel(xw, sheet_name="FutLoc Industria", index=False)
+        _con_rotulos(intl, FUTINT_COLS).to_excel(xw, sheet_name="FutInt Industria", index=False)
     return str(dest)

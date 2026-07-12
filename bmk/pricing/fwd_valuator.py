@@ -102,7 +102,7 @@ def valorar(fwd: pd.DataFrame, curvas: Curvas, fecha_valoracion: int) -> pd.Data
     Devuelve el df con tasa_vpn, tasa_forward, valor_cop_der, valor_cop_obli, pyg.
     """
     out = fwd.copy().reset_index(drop=True)
-    tv, tf, der, obl, pyg, plazo = [], [], [], [], [], []
+    tv, tf, der, obl, pyg, plazo, spots = [], [], [], [], [], [], []
     for _, r in out.iterrows():
         par = str(r["paridad"]).strip().upper()
         cfg = PARES.get(par)
@@ -115,7 +115,8 @@ def valorar(fwd: pd.DataFrame, curvas: Curvas, fecha_valoracion: int) -> pd.Data
         tipo, curva_pts = cfg
         t = int(cumpl) - int(fecha_valoracion)
         if t <= 0:  # forward ya cumplido/liquidado: sin valor de mercado.
-            tv.append(0.0); tf.append(0.0); der.append(0.0); obl.append(0.0); pyg.append(0.0); plazo.append(t)
+            tv.append(0.0); tf.append(0.0); der.append(0.0); obl.append(0.0)
+            pyg.append(0.0); plazo.append(t); spots.append(None)
             continue
         # COP-quoted (USDCOP) descuenta con la tasa COP (FWTCOP); los cruzados
         # USD/XXX y XXX/USD descuentan con la tasa foranea USD (LIBBTS).
@@ -140,8 +141,9 @@ def valorar(fwd: pd.DataFrame, curvas: Curvas, fecha_valoracion: int) -> pd.Data
         else:                    # COMPRA / BUY
             d, o = v_mkt, v_pact
         tv.append(tasa_vpn); tf.append(tasa_fwd)
-        der.append(d); obl.append(o); pyg.append(d - o); plazo.append(t)
+        der.append(d); obl.append(o); pyg.append(d - o); plazo.append(t); spots.append(spot)
     out["plazo_dias"] = plazo
+    out["spot"] = spots
     out["tasa_vpn"] = tv
     out["tasa_forward"] = tf
     out["valor_cop_der"] = der

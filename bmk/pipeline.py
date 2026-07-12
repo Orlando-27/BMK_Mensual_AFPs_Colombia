@@ -138,16 +138,16 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
     dir_curvas = _insumo("fwd_curves")
     if (dir_curvas / "paridades.csv").exists():
         try:
-            from bmk.pricing.fwd_valuator import Curvas
+            from bmk.pricing.fwd_valuator import Curvas, valorar
             curvas = Curvas(dir_curvas)
             fecha_v = valoracion_fwds.corte_a_serial(cfg.corte)
             fwd415 = valoracion_fwds.normalizar_415(arch.formato_415)
-            fwd_val, _ = valoracion_fwds.generar(fwd415, curvas, fecha_v)
+            fwd_val = valorar(fwd415, curvas, fecha_v)  # df crudo (para controles)
             ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte, dir_curvas=dir_curvas)
             # Futuros de TRM (tipo 4) valorados con el mismo motor.
             trm415 = valoracion_fwds.normalizar_415(arch.formato_415, tipo_derivado=4)
             if len(trm415):
-                trm_val, _ = valoracion_fwds.generar(trm415, curvas, fecha_v)
+                trm_val = valorar(trm415, curvas, fecha_v)
             paso(f"Valoracion Fwds Industria: {len(fwd415)} forwards, {len(trm415)} fut TRM -> {ruta_fwd}")
         except Exception as e:  # noqa: BLE001
             reg.agregar("valoracion", "FALLO_VALORACION_FWDS", "ERROR", descripcion=str(e)[:200])

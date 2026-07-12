@@ -72,15 +72,19 @@ def normalizar_415(formato_415: pd.DataFrame, solo_industria: bool = True,
     def c(k):
         return formato_415.iloc[:, COL_415[k]]
     tipo = pd.to_numeric(c("tipo_derivado"), errors="coerce")
+    pos = pd.to_numeric(c("posicion_compra_venta"), errors="coerce")
     df = pd.DataFrame({
         "afp": c("entidad").map(normalizar_afp),
         "portafolio": c("nombre").map(_cod_portafolio),
+        "posicion": pos.map({1: "BUY", 2: "SELL"}),
         "mder": c("moneda_derecho").map(_cur),
         "nder": pd.to_numeric(c("nominal_derecho"), errors="coerce"),
         "mobl": c("moneda_obligacion").map(_cur),
         "nobl": pd.to_numeric(c("nominal_obligacion"), errors="coerce"),
         "strike": pd.to_numeric(c("strike"), errors="coerce"),
-        # Formato_415 trae la fecha en AAAAMMDD -> convertir a serial de Excel.
+        # Formato_415 trae las fechas en AAAAMMDD -> serial de Excel.
+        "fecha_operacion": pd.to_numeric(c("fecha_celebracion"), errors="coerce").map(yyyymmdd_a_serial),
+        "fecha_vencimiento": pd.to_numeric(c("fecha_vencimiento"), errors="coerce").map(yyyymmdd_a_serial),
         "fecha_cumplimiento": pd.to_numeric(c("fecha_liquidacion"), errors="coerce").map(yyyymmdd_a_serial),
     })
     df = df[tipo == tipo_derivado].reset_index(drop=True)
@@ -99,20 +103,51 @@ def normalizar_415(formato_415: pd.DataFrame, solo_industria: bool = True,
     # OPERACION: COMPRA si el derecho es la divisa base (se recibe la divisa), VENTA si se entrega.
     df["operacion"] = [("COMPRA" if md == SPOT_MONEDA.get(p) else "VENTA") if p else None
                        for md, p in zip(df["mder"], df["paridad"])]
+    # MONEDA (la que no es USD) y MONEDA EN CONTRA (USD), como en la hoja Fwd Industria.
+    def _mc(par):
+        if not par:
+            return (None, None)
+        a, b = par[:3], par[3:]
+        if a == "USD":
+            return (b, "USD")
+        if b == "USD":
+            return (a, "USD")
+        return (a, b)
+    mc = df["paridad"].map(_mc)
+    df["moneda"] = [x[0] for x in mc]
+    df["contra"] = [x[1] for x in mc]
     return df[df["paridad"].notna()].reset_index(drop=True)
 
 
+# Columnas de la hoja "Fwd Industria" (rotulos calcados) -> campo del valorador.
+FWD_INDUSTRIA_COLS = [
+    ("FECHA OPERACIÓN", "fecha_operacion"), ("PARIDAD", "paridad"),
+    ("OPERACIÓN", "operacion"), ("VALOR NOMINAL", "nominal"), ("STRIKE", "strike"),
+    ("PORTAFOLIO", "portafolio"), ("POSICION", "posicion"),
+    ("FECHA VENCIMIENTO", "fecha_vencimiento"), ("FECHA CUMPLIMIENTO", "fecha_cumplimiento"),
+    ("SPOT", "spot"), ("Tasa VPN", "tasa_vpn"), ("Tasa Forward", "tasa_forward"),
+    ("VALOR EN COP DER", "valor_cop_der"), ("VALOR EN COP OBLI", "valor_cop_obli"),
+    ("P&G ACUMULADO", "pyg"), ("MONEDA", "moneda"), ("MONEDA EN CONTRA", "contra"),
+    ("NOMINAL USD", "nominal"), ("Plazo", "plazo_dias"), ("AFP", "afp"),
+]
+
+
 def generar(forwards: pd.DataFrame, curvas: Curvas, fecha_valoracion: int):
-    """Devuelve (detalle, resumen) valorando cada forward."""
+    """Devuelve (detalle 'Fwd Industria', resumen por par) valorando cada forward."""
     val = valorar(forwards, curvas, fecha_valoracion)
+    detalle = pd.DataFrame({hdr: (val[campo] if campo in val.columns else "")
+                            for hdr, campo in FWD_INDUSTRIA_COLS})
     resumen = None
-    if {"afp", "portafolio"}.issubset(val.columns):
-        resumen = (val.groupby(["afp", "portafolio", "paridad"], dropna=False)
-                   .agg(n=("pyg", "size"),
-                        valor_der=("valor_cop_der", "sum"),
-                        valor_obli=("valor_cop_obli", "sum"),
-                        pyg=("pyg", "sum")).reset_index())
-    return val, resumen
+    if {"afp", "portafolio", "paridad"}.issubset(val.columns):
+        resumen = (val.groupby(["paridad", "afp", "portafolio"], dropna=False)
+                   .agg(**{"# Contratos": ("pyg", "size"),
+                           "Nominal": ("nominal", "sum"),
+                           "VALOR EN COP DER": ("valor_cop_der", "sum"),
+                           "VALOR EN COP OBLI": ("valor_cop_obli", "sum"),
+                           "P&G ACUMULADO": ("pyg", "sum")}).reset_index())
+        resumen = resumen.rename(columns={"paridad": "PARIDAD", "afp": "AFP",
+                                          "portafolio": "PORTAFOLIO"})
+    return detalle, resumen
 
 
 def escribir(forwards: pd.DataFrame, out_dir: str | Path, corte: str,
@@ -130,7 +165,7 @@ def escribir(forwards: pd.DataFrame, out_dir: str | Path, corte: str,
     detalle, resumen = generar(forwards, curvas, fecha_valoracion)
     dest = out_dir / f"valoracion_fwds_industria_{corte}.xlsx"
     with pd.ExcelWriter(dest, engine="xlsxwriter") as xw:
-        detalle.to_excel(xw, sheet_name="Detalle", index=False)
+        detalle.to_excel(xw, sheet_name="Fwd Industria", index=False)
         if resumen is not None:
-            resumen.to_excel(xw, sheet_name="Resumen", index=False)
+            resumen.to_excel(xw, sheet_name="Resumen pares", index=False)
     return str(dest)

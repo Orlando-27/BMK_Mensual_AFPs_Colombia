@@ -36,7 +36,7 @@ COLUMNAS = [
     ("I", "F.Vcto", "f_vcto"),
     ("J", "Moneda", "moneda"),
     ("K", "Valor Nominal", "valor_nominal"),
-    ("L", "Vr Mercado INICIAL", None),            # FORMULA
+    ("L", "Vr Mercado INICIAL", "vr_mercado"),    # valor de mercado del corte (SFC)
     ("M", "TASA FACIAL", "tasa_facial_ind"),
     ("N", "CLASE DE INVERSION", "clase_inversion"),
     ("O", "MONEDA", "moneda"),

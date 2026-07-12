@@ -109,6 +109,41 @@ def construir(formato_415: pd.DataFrame, solo_industria: bool = True) -> pd.Data
     return df
 
 
+# Codigo de frecuencia (Mo) segun periodicidad, como en SWAPIND (AV/SV/TV/MV).
+_MO = {"Anual": "AV", "Semestral": "SV", "Trimestral": "TV", "Mensual": "MV",
+       "Bimestral": "BV", "Cuatrimestral": "CV", "Al vencimiento": "AV"}
+
+
+def _clase(indice_cod: str) -> str:
+    """IND CLASE de SWAPIND: SWAP TF (tasa fija) si FS, SWAP TV si flotante."""
+    return "SWAP TF" if str(indice_cod).upper().strip() == "FS" else "SWAP TV"
+
+
+def a_swapind(sab: pd.DataFrame) -> pd.DataFrame:
+    """Mapea la sabana al layout exacto de la hoja SWAPIND (Calculadora Swap).
+    Las columnas de VPN/Utilidad quedan vacias (las llena el motor v6)."""
+    def col(campo):
+        return sab[campo] if campo in sab.columns else ""
+    facial_der = pd.to_numeric(sab["der_tasa_facial"], errors="coerce") / 100.0
+    facial_obl = pd.to_numeric(sab["obl_tasa_facial"], errors="coerce") / 100.0
+    out = pd.DataFrame({
+        "TIPO SWAP": col("tipo_swap"), "ISIN": col("id_contrato"), "EMISOR": col("afp"),
+        "F.Compra": col("f_compra"), "Emision": col("f_compra"), "F.Vcto": col("f_vcto"),
+        "IND CLASE": sab["der_indice_cod"].map(_clase), "IND. Tfacial": col("der_indice_cod"),
+        "Facial": facial_der, "Period.": col("der_periodicidad"),
+        "Mo": sab["der_periodicidad"].map(_MO), "Vr Nominal DER": col("der_nominal"),
+        "Moneda": col("der_moneda"), "VPN Derecho ME": "",
+        "IND CLASE.1": sab["obl_indice_cod"].map(_clase), "IND. Tfacial.1": col("obl_indice_cod"),
+        "Facial.1": facial_obl, "Period..1": col("obl_periodicidad"),
+        "Mo.1": sab["obl_periodicidad"].map(_MO), "Vr Nominal": col("obl_nominal"),
+        "Moneda.1": col("obl_moneda"), "VPN Obligacion ME": "",
+        "Utilidad/Perdida": "", "POR": col("portafolio"), "IBR o/n": "",
+        "Base Derecho": col("der_base"), "Base Obligación": col("obl_base"),
+        "FECHA": "", "FCD": "", "FCO": "",
+    })
+    return out
+
+
 def escribir(formato_415: pd.DataFrame, out_dir: str | Path, corte: str,
              solo_industria: bool = True) -> str:
     out_dir = Path(out_dir)
@@ -116,5 +151,5 @@ def escribir(formato_415: pd.DataFrame, out_dir: str | Path, corte: str,
     df = construir(formato_415, solo_industria)
     dest = out_dir / f"sabana_condiciones_faciales_swaps_{corte}.xlsx"
     with pd.ExcelWriter(dest, engine="xlsxwriter") as xw:
-        df.to_excel(xw, sheet_name="Condiciones Faciales", index=False)
+        a_swapind(df).to_excel(xw, sheet_name="SWAPIND", index=False)
     return str(dest)
