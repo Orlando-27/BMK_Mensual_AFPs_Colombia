@@ -24,8 +24,9 @@ COL_351 = {
     "f_vcto": 31,           # AF Fecha Vencim Titulo
     "moneda": 34,           # AI Codigo Moneda
     "valor_nominal": 36,    # AK Valor Nominal
-    "valor_nominal_residual": 38,  # AM
+    "valor_nominal_residual": 38,  # AM Vlor_Nominal_Residual_Capit
     "nro_acciones": 39,     # AN No. Acciones
+    "vr_moneda_ext": 55,    # Vr_mrcd_pres_mnda_dif_peso (valor en moneda del activo)
     "vr_mercado": 53,       # BB Vr. mercado o Vr presente en $
     "tasa_facial_valor": 56,  # BE Tasa de negoc
     "tasa_facial_ind": 43,  # AR Tasa Facial Titulo

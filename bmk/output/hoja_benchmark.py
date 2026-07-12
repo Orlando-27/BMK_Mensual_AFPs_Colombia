@@ -73,6 +73,51 @@ def _num(s):
     return pd.to_numeric(s, errors="coerce")
 
 
+_NOM_MAP: dict | None = None
+
+
+def _cargar_nominal_map(ref_dir: str | Path = "bmk/config/reference") -> dict:
+    """clas_sfc -> columna de nominal (Diccionario SFC Z:AB de las macros)."""
+    global _NOM_MAP
+    if _NOM_MAP is None:
+        path = Path(ref_dir) / "nominal_por_clas_sfc.csv"
+        if path.exists():
+            d = pd.read_csv(path, dtype=str).fillna("")
+            _NOM_MAP = {str(a).strip().upper(): str(b).strip()
+                        for a, b in zip(d["clas_sfc"], d["nominal_col"])}
+        else:
+            _NOM_MAP = {}
+    return _NOM_MAP
+
+
+def _nominal_benchmark(df: pd.DataFrame, vr: pd.Series,
+                       ref_dir: str | Path = "bmk/config/reference") -> pd.Series:
+    """Valor Nominal segun la tabla 'NOMINAL A USAR' de las macros:
+    Valor nominal (AK) / Nominal residual (AM) / No. Unidades (AN) por clas_sfc.
+    Para depositos (caja) con nominal 0 usa el monto: Vr Mercado / FX = valor en
+    moneda del activo (COP para locales, moneda extranjera para foraneos).
+    """
+    nmap = _cargar_nominal_map(ref_dir)
+    def _c(name):
+        return _num(df[name]) if name in df.columns else pd.Series(0.0, index=df.index)
+    cols = {"valor_nominal": _c("valor_nominal"),
+            "valor_nominal_residual": _c("valor_nominal_residual"),
+            "nro_acciones": _c("nro_acciones")}
+    ext = _c("vr_moneda_ext")
+    cs = df["clas_sfc"].astype(str).str.upper()
+    # columna base segun el mapa (default: valor_nominal)
+    colname = cs.map(nmap).fillna("valor_nominal")
+    nominal = pd.Series(0.0, index=df.index)
+    for name, serie in cols.items():
+        nominal = nominal.where(colname != name, serie)
+    # Fallback depositos/caja con nominal 0: monto en moneda del activo.
+    clasif = df["clasificacion"].astype(str).str.upper()
+    dep = (nominal.fillna(0) == 0) & (clasif == "CAJA")
+    monto = ext.where(ext.abs() > 0, vr)
+    nominal = nominal.where(~dep, monto)
+    return nominal
+
+
 def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
             solo_industria: bool = True, umbral_min: float = 1000.0,
             csa: pd.DataFrame | None = None) -> pd.DataFrame:
@@ -99,16 +144,7 @@ def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
     nemo = df["nemo"].astype(str).str.strip()
     df["identificador"] = isin.where(isin != "", nemo.where(nemo != "", df["emisor"]))
     vr = _num(df["vr_mercado"])
-    # Valor Nominal segun tipo (como las macros):
-    #   R FIJA     -> Valor Nominal (col AK del SFC)
-    #   R VARIABLE -> No. Acciones  (col AN)  -> acciones, fondos, ETF, carteras
-    #   CAJA       -> valor de mercado (monto del deposito)
-    ak = _num(df["valor_nominal"])
-    an = _num(df["nro_acciones"]) if "nro_acciones" in df.columns else pd.Series(0.0, index=df.index)
-    clasif = df["clasificacion"].astype(str).str.upper()
-    # CAJA: # unidades si las hay (carteras colectivas CCA), si no el monto (depositos).
-    caja_nom = an.where(an > 0, vr)
-    nominal = ak.where(clasif != "R VARIABLE", an).where(clasif != "CAJA", caja_nom)
+    nominal = _nominal_benchmark(df, vr)
     df["valor_nominal"] = nominal
     # Precio inicial = Vr mercado / Nominal (=1 en caja, precio por unidad en RF/RV).
     df["precio_proxy"] = (vr / nominal).where(nominal > 0)
