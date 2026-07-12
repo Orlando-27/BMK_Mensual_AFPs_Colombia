@@ -94,6 +94,34 @@ Resultado (corte abril, 2.531 grupos instrumento-emisor casados):
 - **Precio (Vr Mercado/Nominal) cuadra: 100.00%**
 - Residual: 2 grupos FCPE (diferencia de etiqueta de emisor, valor idéntico).
 
+### Por qué 99.92% y no 100% — explicado y descartado
+
+El 99.92% **no es un error de cálculo de nominal**. Es un artefacto de la clave
+de comparación, que agrupa por **etiqueta de emisor**. Las macros homologan el
+emisor de los fondos de capital privado (FCPE) al nombre del gestor
+(p. ej. "PARTNERS GROUP PGCS I SECONDARY", "SILVER LAKE SLP V"); el SFC crudo
+trae la etiqueta por posición. Al agrupar por esa clave, 2 buckets no alinean:
+
+| Grupo | Filas ellos / nosotros | Nominal ellos | Nominal nosotros |
+|---|---|---:|---:|
+| PORVENIR/PO FCPE "PARTNERS GROUP…" | 3 / 1 | 2.965.224 | 1.429.035 |
+| PORVENIR/PM FCPE "SILVER LAKE SLP V" | 44 / 45 | 37.749,53 | 37.827,05 |
+
+Las posiciones son las mismas; solo caen en un bucket de emisor distinto (a una
+posición le pusieron otro rótulo). La prueba de que **no falta ni sobra nominal**:
+
+- **FCPE en total**: 4.686 filas ellos = 4.686 nosotros; nominal **1.171.129.551,50
+  = 1.171.129.551,50** (idéntico al centavo).
+- **Nominal total industria**: 178.614.864.806.443,75 (ellos) vs
+  178.614.864.806.443,81 (nosotros) → diferencia **0,06 COP** sobre 178 billones
+  (**+0,000000%**), puro redondeo de punto flotante.
+
+**Conclusión: el nominal cuadra al 100% en valor.** El "99,92%" mide *cuántos
+buckets de emisor alinean*, no cuánto nominal coincide; cada fila FCPE calcula
+`nominal = No. Acciones` correctamente. Es cosmético (rótulo de emisor), como las
+3 filas FCP y las 6 CSA ya documentadas. Queda pendiente (opcional) homologar
+etiquetas de emisor para que el 99,92% suba a 100% también a nivel de bucket.
+
 ## ⚠️ Derivados — NO incluidos aún
 
 Las 15.714 filas comparadas son **solo activos + CSA**. La hoja Benchmark de las
