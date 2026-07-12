@@ -54,12 +54,28 @@ al 100%.
 - **Precio**: en depósitos = 1 (par) en ambos; en renta fija nuestro precio es proxy
   (Vr mercado / Nominal) hasta integrar el vector.
 
-## Pendientes para cierre 100%
+## Cierre (con CSA incluida) — MATCH AL PESO
 
-1. **Incluir CSA** en la hoja Benchmark (mapear `Cuentas CSA` → filas CAJA
-   internacional, convertir USD→COP con la TRM del corte).
-2. (Opcional) Alinear el **nominal de acciones/FCP** a la convención de las macros.
-3. (Opcional) Reemplazar el **precio proxy** por el del vector del corte.
+Tras incluir las CSA (TRM 3.637,51 derivada del propio archivo SFC):
+
+| Métrica | Macros | Pipeline | Diferencia |
+|---|---:|---:|---|
+| Activos industria | 15.714 | 15.714 | **0** |
+| Valor de mercado | 503,3260 B | 503,3260 B | **0,0000%** |
+
+**Cero diferencias reales.** Las 6 CSA cuadran al peso. El único residual es
+cosmético: etiqueta de emisor en 6 CSA (macros: vacío; pipeline: "CSA USD") y
+en 3 FCP (macros: "PARTNERS GROUP…"; SFC crudo: otro rótulo) — misma posición y
+mismo valor.
+
+**Conclusión: el pipeline reproduce la hoja Benchmark de industria exactamente
+(mismo número de filas y valor de mercado al peso), con clasificación 100%.**
+
+## Opcionales (no afectan el cuadre)
+
+1. Alinear el **nominal de acciones/FCP** a la convención de las macros (# acciones).
+2. Reemplazar el **precio proxy** por el del vector del corte.
+3. Homologar etiquetas de emisor (CSA/FCP) — cosmético.
 
 ## Herramienta
 
