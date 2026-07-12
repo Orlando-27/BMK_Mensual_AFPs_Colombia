@@ -48,22 +48,31 @@ Extraidos a `insumos/fwd_curves/` (CSV swappables) por `bmk.pricing.extraer_curv
 
 ## Validacion (contra la hoja Fwd Industria del propio archivo)
 
-2.343 forwards, 9 pares. Valorando con las curvas del archivo y su fecha de
-valoracion, el P&G reproduce el de la hoja **al peso**:
+2.343 filas, 9 pares. Valorando con las curvas del archivo y su fecha de
+valoracion, el P&G reproduce el de la hoja **al peso, exacto**:
 
 | Metrica | Resultado |
 |---|---|
-| P&G total (excl. 5 anomalas) | **-0,00045%** vs hoja |
-| Filas dentro de 1 COP | 2.284 / 2.338 |
-| USDCOP (1.372 filas) | P&G exacto 1.372/1.372 |
-| Cruzados (BRL, MXN, JPY, EUR, AUD, CAD, CLP) | exacto al peso |
+| Forwards (excl. futuros TRM) | 2.338 |
+| Filas dentro de 1 COP | **2.338 / 2.338** |
+| P&G total | **+0,000000%** (0 COP de diferencia) |
+| USDCOP, EUR, GBP, AUD, BRL, MXN, JPY, CAD, CLP | todos exactos |
 
-Residuales conocidos:
-1. **5 forwards de PROTECCION** con nominal 353-400 MM USD: la hoja los fuerza a
-   P&G=0 (exclusion especifica del macro, aun por confirmar la regla). Son el
-   unico gap material (~847 mil MM COP si se valoran).
-2. **GBPUSD** (55 filas): residual ~0,2% por fila (curva de puntos GBP); < 0,15%
-   del P&G total. Por afinar el escalado de `Fwd_GBPUSD_Diaria`.
+### Futuros de TRM (columna AH)
+
+5 filas de la hoja marcadas **AH = "TRM"** (nominal 353-400 MM USD, PROTECCION)
+son **futuros de TRM**, no forwards. La hoja los valora con la misma mecanica de
+forward pero los deja fuera del P&G forward (van al bloque de futuros de TRM).
+En produccion vienen de Formato_415 con `tipo_derivado = 4` (no `1`), asi que el
+output de forwards ya los excluye; el mismo motor se reutiliza en el paso de
+futuros para valorarlos.
+
+### Puntos forward por par
+
+- **USDXXX** (BRL, MXN, JPY, CLP, CHF, CAD): puntos `FWP<par>`, sumados al spot.
+- **EURUSD**: puntos `FWPEUR`, sumados.
+- **AUDUSD, GBPUSD**: **sin puntos** (el forward = spot descontado por LIBBTS).
+- **USDCOP**: puntos `FWPCOP`, descuento `FWTCOP`.
 
 ## Salida
 
@@ -78,8 +87,7 @@ o la propia hoja `Fwd Industria` para validacion.
 
 ## Pendiente
 
-1. Confirmar la regla de exclusion de los 5 forwards grandes de PROTECCION.
-2. Afinar el escalado de la curva de puntos GBP.
-3. Reemplazar las curvas placeholder por las del corte real (mismo CSV).
-4. Validar el normalizador Formato_415 -> paridad/operacion/nominal contra un
+1. Reemplazar las curvas placeholder por las del corte real (mismo CSV).
+2. Validar el normalizador Formato_415 -> paridad/operacion/nominal contra un
    corte con hoja Fwd Industria del mismo mes.
+3. Reutilizar el motor para valorar los futuros de TRM (Formato_415 tipo 4).

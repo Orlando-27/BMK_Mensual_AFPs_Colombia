@@ -42,8 +42,8 @@ import pandas as pd
 PARES = {
     "USDCOP": ("COP", "FWPCOP"),
     "EURUSD": ("USDX", "FWPEUR"),
-    "AUDUSD": ("USDX", None),
-    "GBPUSD": ("USDX", "Fwd_GBPUSD_Diaria"),
+    "AUDUSD": ("USDX", None),   # sin puntos (el forward = spot descontado)
+    "GBPUSD": ("USDX", None),   # sin puntos (el forward = spot descontado)
     "USDBRL": ("XUSD", "FWPBRL"),
     "USDMXN": ("XUSD", "FWPMXN"),
     "USDJPY": ("XUSD", "FWPJPY"),
