@@ -83,14 +83,16 @@ la convención de las macros:
 | Caja — carteras colectivas (CCA) | No. Acciones (# unidades) |
 | Caja — depósitos (DEPVN) | Valor de mercado (monto del depósito) |
 
-Resultado (corte abril, grupos instrumento-emisor casados = 2.531):
-- **Nominal cuadra: 96.6%**
-- **Precio implícito (Vr Mercado/Nominal) cuadra: 96.7%**
-- Suma de nominal industria: +2.56% vs macros.
+La regla exacta está en la tabla **`Diccionario SFC` Z:AB ("NOMINAL A USAR")** de
+las macros (67 códigos), extraída a `config/reference/nominal_por_clas_sfc.csv`:
+cada `clas_sfc` → `Valor nominal` (AK) / `Nominal residual` (AM) / `No. Unidades`
+(AN). Para depósitos con nominal 0 se usa el monto (Vr Mercado / FX = valor en la
+moneda del activo).
 
-Residual (~3.4%): **DEPVE** (depósitos foráneos: monto en moneda extranjera vs COP)
-y algunos bonos (BOEVS/BOENVS/TCC*) con convención de nominal específica. No afecta
-el valor de mercado (que cuadra al peso).
+Resultado (corte abril, 2.531 grupos instrumento-emisor casados):
+- **Nominal cuadra: 99.92%** (agregado **+0.0000%**, exacto)
+- **Precio (Vr Mercado/Nominal) cuadra: 100.00%**
+- Residual: 2 grupos FCPE (diferencia de etiqueta de emisor, valor idéntico).
 
 ## ⚠️ Derivados — NO incluidos aún
 
