@@ -17,22 +17,30 @@ import pandas as pd
 
 
 def extraer(xlsb_path: str | Path, out_dir: str | Path = "insumos") -> int:
+    """Extrae el vector escribiendo fila por fila (bajo consumo de memoria)."""
+    import csv
     import pyxlsb
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     wb = pyxlsb.open_workbook(str(xlsb_path))
-    filas = []
-    with wb.get_sheet("VECTOR DE PRECIOS") as sh:
-        for i, row in enumerate(sh.rows()):
-            if i == 0:
-                continue
-            v = [c.v for c in row]
-            if v and v[0] is not None and len(v) > 1 and isinstance(v[1], (int, float)):
-                moneda = v[3] if len(v) > 3 and v[3] is not None else ""
-                filas.append((str(v[0]).strip(), float(v[1]), str(moneda).strip()))
-    df = pd.DataFrame(filas, columns=["id", "precio", "moneda"]).drop_duplicates("id")
-    df.to_csv(out_dir / "vector_precios.csv", index=False)
-    return len(df)
+    n, vistos = 0, set()
+    with open(out_dir / "vector_precios.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["id", "precio", "moneda"])
+        with wb.get_sheet("VECTOR DE PRECIOS") as sh:
+            for i, row in enumerate(sh.rows()):
+                if i == 0:
+                    continue
+                v = [c.v for c in row]
+                if v and v[0] is not None and len(v) > 1 and isinstance(v[1], (int, float)):
+                    ident = str(v[0]).strip()
+                    if ident in vistos:
+                        continue
+                    vistos.add(ident)
+                    moneda = v[3] if len(v) > 3 and v[3] is not None else ""
+                    w.writerow([ident, float(v[1]), str(moneda).strip()])
+                    n += 1
+    return n
 
 
 if __name__ == "__main__":
