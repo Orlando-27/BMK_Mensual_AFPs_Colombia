@@ -31,6 +31,13 @@ from bmk.output import excel, hoja_benchmark, controles, valoracion_fwds, valora
 from bmk.alerts.registry import RegistroAlertas
 
 
+def _insumo(nombre: str) -> Path:
+    """Resuelve un insumo: usa insumos/ si existe, si no cae a insumos_demo/
+    (placeholder versionado en el repo, para correr sin abrir los .xlsb)."""
+    p = Path("insumos") / nombre
+    return p if p.exists() else Path("insumos_demo") / nombre
+
+
 def correr(cfg: Config, archivo: str | None = None) -> dict:
     reg = RegistroAlertas(corte=cfg.corte)
     log: list[str] = []
@@ -128,14 +135,15 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
     # Valoracion de forwards de la industria (replica hoja Fwd Industria).
     ruta_fwd = None
     fwd_val = trm_val = local_fut = intl_fut = swap_sab = None
-    if Path("insumos/fwd_curves/paridades.csv").exists():
+    dir_curvas = _insumo("fwd_curves")
+    if (dir_curvas / "paridades.csv").exists():
         try:
             from bmk.pricing.fwd_valuator import Curvas
-            curvas = Curvas()
+            curvas = Curvas(dir_curvas)
             fecha_v = valoracion_fwds.corte_a_serial(cfg.corte)
             fwd415 = valoracion_fwds.normalizar_415(arch.formato_415)
             fwd_val, _ = valoracion_fwds.generar(fwd415, curvas, fecha_v)
-            ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte)
+            ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte, dir_curvas=dir_curvas)
             # Futuros de TRM (tipo 4) valorados con el mismo motor.
             trm415 = valoracion_fwds.normalizar_415(arch.formato_415, tipo_derivado=4)
             if len(trm415):
@@ -149,12 +157,14 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
 
     # Valoracion de futuros (locales TES + internacionales), replica FutLoc/FutInt.
     ruta_fut = None
-    if Path("insumos/vector_precios.csv").exists():
+    vector_path = _insumo("vector_precios.csv")
+    if vector_path.exists():
         try:
             trm = fx.trm(arch.formato_351)
             fx_map = {"USD": trm, "COP": 1.0}
-            local_fut, intl_fut = valoracion_futuros.valorar(arch.formato_415, fx=fx_map)
-            ruta_fut = valoracion_futuros.escribir(arch.formato_415, cfg.dir_corte(), cfg.corte, fx=fx_map)
+            local_fut, intl_fut = valoracion_futuros.valorar(arch.formato_415, vector_path=vector_path, fx=fx_map)
+            ruta_fut = valoracion_futuros.escribir(arch.formato_415, cfg.dir_corte(), cfg.corte,
+                                                   vector_path=vector_path, fx=fx_map)
             paso(f"Valoracion Futuros Industria: {ruta_fut}")
             # Alertar futuros internacionales sin precio en el vector (instrumento nuevo).
             nuevos = intl_fut[intl_fut["precio_vector"].isna()] if len(intl_fut) else intl_fut
