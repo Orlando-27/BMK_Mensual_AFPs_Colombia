@@ -19,6 +19,8 @@ import argparse
 import json
 from pathlib import Path
 
+import pandas as pd
+
 from bmk.config.settings import Config
 from bmk.ingest import sfc
 from bmk.prepare import normalize, csa as csamod, fx
@@ -125,11 +127,20 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
 
     # Valoracion de forwards de la industria (replica hoja Fwd Industria).
     ruta_fwd = None
+    fwd_val = trm_val = local_fut = intl_fut = swap_sab = None
     if Path("insumos/fwd_curves/paridades.csv").exists():
         try:
+            from bmk.pricing.fwd_valuator import Curvas
+            curvas = Curvas()
+            fecha_v = valoracion_fwds.corte_a_serial(cfg.corte)
             fwd415 = valoracion_fwds.normalizar_415(arch.formato_415)
+            fwd_val, _ = valoracion_fwds.generar(fwd415, curvas, fecha_v)
             ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte)
-            paso(f"Valoracion Fwds Industria: {len(fwd415)} forwards -> {ruta_fwd}")
+            # Futuros de TRM (tipo 4) valorados con el mismo motor.
+            trm415 = valoracion_fwds.normalizar_415(arch.formato_415, tipo_derivado=4)
+            if len(trm415):
+                trm_val, _ = valoracion_fwds.generar(trm415, curvas, fecha_v)
+            paso(f"Valoracion Fwds Industria: {len(fwd415)} forwards, {len(trm415)} fut TRM -> {ruta_fwd}")
         except Exception as e:  # noqa: BLE001
             reg.agregar("valoracion", "FALLO_VALORACION_FWDS", "ERROR", descripcion=str(e)[:200])
             paso(f"Valoracion Fwds: fallo ({str(e)[:80]})")
@@ -164,16 +175,22 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
     # Sabana de condiciones faciales de swaps (insumo del motor de valoracion v6).
     try:
         from bmk.pricing.swaps import sabana as swap_sabana
+        swap_sab = swap_sabana.construir(arch.formato_415)
         ruta_sab = swap_sabana.escribir(arch.formato_415, cfg.dir_corte(), cfg.corte)
-        n_sab = len(swap_sabana.construir(arch.formato_415))
-        paso(f"Sabana condiciones faciales swaps: {n_sab} swaps -> {ruta_sab}")
+        paso(f"Sabana condiciones faciales swaps: {len(swap_sab)} swaps -> {ruta_sab}")
     except Exception as e:  # noqa: BLE001
         reg.agregar("swaps", "FALLO_SABANA_SWAPS", "ERROR", descripcion=str(e)[:200])
         paso(f"Sabana swaps: fallo ({str(e)[:80]})")
 
-    # Archivo de controles formulado (verificacion trazable en Excel)
-    ruta_ctrl = controles.generar(clas, cfg.dir_corte(), cfg.corte)
-    paso(f"Controles (formulado): {ruta_ctrl}")
+    # Tabla unificada de derivados para los controles.
+    from bmk.consolidate import derivados as der_control
+    tabla_deriv = der_control.construir(fwd_val=fwd_val, trm_val=trm_val,
+                                        fut_local=local_fut, fut_int=intl_fut,
+                                        swaps_sabana=swap_sab)
+
+    # Archivo de controles formulado (verificacion trazable en Excel), con derivados.
+    ruta_ctrl = controles.generar(clas, cfg.dir_corte(), cfg.corte, derivados=tabla_deriv)
+    paso(f"Controles (formulado): {ruta_ctrl} ({len(tabla_deriv)} derivados)")
 
     alert_out = reg.escribir(cfg.dir_corte())
     paso(f"Alertas: {alert_out['n']} -> {alert_out['xlsx']}")

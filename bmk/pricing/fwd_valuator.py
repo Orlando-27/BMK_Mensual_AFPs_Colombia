@@ -31,6 +31,7 @@ puntos por par disponible en `Curvas` (ver validar_contra_sabana).
 from __future__ import annotations
 
 import bisect
+import math
 from pathlib import Path
 
 import pandas as pd
@@ -122,6 +123,11 @@ def valorar(fwd: pd.DataFrame, curvas: Curvas, fecha_valoracion: int) -> pd.Data
         rl = curvas.interp(curva_desc, t) / 100.0
         df = 1.0 / (1.0 + rl * t / 360.0)
         spot = r["spot"] if "spot" in out.columns and pd.notna(r.get("spot")) else curvas.spot.get(SPOT_MONEDA.get(par, ""), 0.0)
+        # Normalizar el strike a la convencion de cotizacion del par: si viene
+        # invertido (p. ej. USDJPY 0.0064 en vez de 156), 1/strike queda mas cerca
+        # del spot -> invertir. No afecta strikes ya correctos (SABANA validada).
+        if K > 0 and spot > 0 and abs(math.log(K / spot)) > abs(math.log((1.0 / K) / spot)):
+            K = 1.0 / K
         pts = curvas.interp(curva_pts, t) if curva_pts else 0.0
         mkt = spot + pts
         tasa_vpn = K * df
