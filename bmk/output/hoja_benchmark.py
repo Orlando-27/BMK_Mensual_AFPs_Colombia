@@ -98,9 +98,19 @@ def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
     isin = df["isin"].astype(str).str.strip()
     nemo = df["nemo"].astype(str).str.strip()
     df["identificador"] = isin.where(isin != "", nemo.where(nemo != "", df["emisor"]))
-    nominal = _num(df["valor_nominal"])
     vr = _num(df["vr_mercado"])
-    # Precio inicial (proxy) = Vr mercado / Valor nominal (limpio); si no aplica, vacio.
+    # Valor Nominal segun tipo (como las macros):
+    #   R FIJA     -> Valor Nominal (col AK del SFC)
+    #   R VARIABLE -> No. Acciones  (col AN)  -> acciones, fondos, ETF, carteras
+    #   CAJA       -> valor de mercado (monto del deposito)
+    ak = _num(df["valor_nominal"])
+    an = _num(df["nro_acciones"]) if "nro_acciones" in df.columns else pd.Series(0.0, index=df.index)
+    clasif = df["clasificacion"].astype(str).str.upper()
+    # CAJA: # unidades si las hay (carteras colectivas CCA), si no el monto (depositos).
+    caja_nom = an.where(an > 0, vr)
+    nominal = ak.where(clasif != "R VARIABLE", an).where(clasif != "CAJA", caja_nom)
+    df["valor_nominal"] = nominal
+    # Precio inicial = Vr mercado / Nominal (=1 en caja, precio por unidad en RF/RV).
     df["precio_proxy"] = (vr / nominal).where(nominal > 0)
 
     out = pd.DataFrame()

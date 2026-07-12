@@ -71,11 +71,40 @@ mismo valor.
 **Conclusión: el pipeline reproduce la hoja Benchmark de industria exactamente
 (mismo número de filas y valor de mercado al peso), con clasificación 100%.**
 
-## Opcionales (no afectan el cuadre)
+## Validación de NOMINAL y PRECIO
 
-1. Alinear el **nominal de acciones/FCP** a la convención de las macros (# acciones).
-2. Reemplazar el **precio proxy** por el del vector del corte.
-3. Homologar etiquetas de emisor (CSA/FCP) — cosmético.
+El "Valor Nominal" del SFC significa algo distinto por tipo de activo; se replicó
+la convención de las macros:
+
+| Tipo | Nominal |
+|---|---|
+| Renta fija (TES, bonos) | Valor Nominal (col AK) |
+| Renta variable (acciones, fondos, ETF) | No. Acciones (col AN) |
+| Caja — carteras colectivas (CCA) | No. Acciones (# unidades) |
+| Caja — depósitos (DEPVN) | Valor de mercado (monto del depósito) |
+
+Resultado (corte abril, grupos instrumento-emisor casados = 2.531):
+- **Nominal cuadra: 96.6%**
+- **Precio implícito (Vr Mercado/Nominal) cuadra: 96.7%**
+- Suma de nominal industria: +2.56% vs macros.
+
+Residual (~3.4%): **DEPVE** (depósitos foráneos: monto en moneda extranjera vs COP)
+y algunos bonos (BOEVS/BOENVS/TCC*) con convención de nominal específica. No afecta
+el valor de mercado (que cuadra al peso).
+
+## ⚠️ Derivados — NO incluidos aún
+
+Las 15.714 filas comparadas son **solo activos + CSA**. La hoja Benchmark de las
+macros tiene **18.638 filas**: 15.714 activos/CSA **+ 2.924 derivados** (IRS 2.430,
+CCS 254, forwards ~240). La hoja que genera el pipeline **aún no incluye los
+derivados**; es el siguiente paso para replicar la hoja completa.
+
+## Opcionales / pendientes
+
+1. **Incluir derivados** (forwards, futuros, swaps) como filas de la hoja Benchmark.
+2. Afinar nominal de DEPVE (moneda extranjera) y bonos especiales.
+3. Reemplazar el precio proxy por el del vector del corte.
+4. Homologar etiquetas de emisor (CSA/FCP) — cosmético.
 
 ## Herramienta
 
