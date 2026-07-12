@@ -21,7 +21,7 @@ from pathlib import Path
 
 from bmk.config.settings import Config
 from bmk.ingest import sfc
-from bmk.prepare import normalize
+from bmk.prepare import normalize, csa as csamod, fx
 from bmk.classify import classifier, detector
 from bmk.derivatives import router, forwards, swaps as swp
 from bmk.consolidate import benchmark, reconcile
@@ -109,8 +109,13 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
     ruta_xlsx = excel.escribir_consolidado(cfg.dir_corte(), cfg.corte, hojas)
     paso(f"Consolidado: {ruta_xlsx}")
 
+    # Cuentas CSA (caja internacional): TRM derivada del propio archivo SFC.
+    trm = fx.trm(arch.formato_351)
+    csa_rows = csamod.extraer_csa(arch.cuentas_csa, trm)
+    paso(f"CSA: {len(csa_rows)} cuentas internacionales (TRM {trm:,.2f} del archivo)")
+
     # Hoja Benchmark para importar en la herramienta diaria (solo datos; formulas vacias)
-    ruta_hoja = hoja_benchmark.escribir(clas, cfg.dir_corte(), cfg.corte)
+    ruta_hoja = hoja_benchmark.escribir(clas, cfg.dir_corte(), cfg.corte, csa=csa_rows)
     paso(f"Hoja Benchmark (importar): {ruta_hoja}")
 
     # Archivo de controles formulado (verificacion trazable en Excel)

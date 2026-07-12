@@ -74,7 +74,8 @@ def _num(s):
 
 
 def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
-            solo_industria: bool = True, umbral_min: float = 1000.0) -> pd.DataFrame:
+            solo_industria: bool = True, umbral_min: float = 1000.0,
+            csa: pd.DataFrame | None = None) -> pd.DataFrame:
     """Devuelve la hoja Benchmark: filas = activos consolidados, columnas en
     orden; datos llenos, formuladas vacias.
 
@@ -82,6 +83,7 @@ def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
       - solo_industria=True excluye COLFONDOS (va en su propia hoja).
       - umbral_min filtra activos con |Vr Mercado| < umbral (paso "Mercado<1000"
         del manual; esos van a Eliminados, no al Benchmark).
+      - csa: filas de Cuentas CSA (caja internacional) a anexar (ver bmk.prepare.csa).
     """
     df = clasificados.copy()
     if solo_industria:
@@ -89,6 +91,8 @@ def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
     if umbral_min:
         vr_ = pd.to_numeric(df["vr_mercado"], errors="coerce").fillna(0)
         df = df[vr_.abs() >= umbral_min]
+    if csa is not None and not csa.empty:
+        df = pd.concat([df, csa], ignore_index=True)
     df = df.reset_index(drop=True)
     # Campos derivados que la hoja necesita.
     isin = df["isin"].astype(str).str.strip()
@@ -110,11 +114,12 @@ def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
     return out.reset_index(drop=True)
 
 
-def escribir(clasificados: pd.DataFrame, out_dir: str | Path, corte: str) -> str:
+def escribir(clasificados: pd.DataFrame, out_dir: str | Path, corte: str,
+             csa: pd.DataFrame | None = None) -> str:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     dest = out_dir / f"hoja_Benchmark_{corte}.xlsx"
-    hoja = generar(clasificados)
+    hoja = generar(clasificados, csa=csa)
     with pd.ExcelWriter(dest, engine="xlsxwriter") as xw:
         hoja.to_excel(xw, sheet_name="Benchmark", index=False)
     return str(dest)
