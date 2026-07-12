@@ -73,10 +73,23 @@ def _num(s):
     return pd.to_numeric(s, errors="coerce")
 
 
-def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True) -> pd.DataFrame:
+def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
+            solo_industria: bool = True, umbral_min: float = 1000.0) -> pd.DataFrame:
     """Devuelve la hoja Benchmark: filas = activos consolidados, columnas en
-    orden; datos llenos, formuladas vacias."""
+    orden; datos llenos, formuladas vacias.
+
+    Para replicar la hoja Benchmark de la herramienta diaria:
+      - solo_industria=True excluye COLFONDOS (va en su propia hoja).
+      - umbral_min filtra activos con |Vr Mercado| < umbral (paso "Mercado<1000"
+        del manual; esos van a Eliminados, no al Benchmark).
+    """
     df = clasificados.copy()
+    if solo_industria:
+        df = df[df["afp"] != "COLFONDOS"]
+    if umbral_min:
+        vr_ = pd.to_numeric(df["vr_mercado"], errors="coerce").fillna(0)
+        df = df[vr_.abs() >= umbral_min]
+    df = df.reset_index(drop=True)
     # Campos derivados que la hoja necesita.
     isin = df["isin"].astype(str).str.strip()
     nemo = df["nemo"].astype(str).str.strip()
