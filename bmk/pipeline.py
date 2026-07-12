@@ -25,7 +25,7 @@ from bmk.prepare import normalize, csa as csamod, fx
 from bmk.classify import classifier, detector
 from bmk.derivatives import router, forwards, swaps as swp, benchmark_rows as der_rows
 from bmk.consolidate import benchmark, reconcile
-from bmk.output import excel, hoja_benchmark, controles, valoracion_fwds
+from bmk.output import excel, hoja_benchmark, controles, valoracion_fwds, valoracion_futuros
 from bmk.alerts.registry import RegistroAlertas
 
 
@@ -135,6 +135,20 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
             paso(f"Valoracion Fwds: fallo ({str(e)[:80]})")
     else:
         paso("Valoracion Fwds: omitida (sin curvas en insumos/fwd_curves)")
+
+    # Valoracion de futuros (locales TES + internacionales), replica FutLoc/FutInt.
+    ruta_fut = None
+    if Path("insumos/vector_precios.csv").exists():
+        try:
+            trm = fx.trm(arch.formato_351)
+            fx_map = {"USD": trm, "COP": 1.0}
+            ruta_fut = valoracion_futuros.escribir(arch.formato_415, cfg.dir_corte(), cfg.corte, fx=fx_map)
+            paso(f"Valoracion Futuros Industria: {ruta_fut}")
+        except Exception as e:  # noqa: BLE001
+            reg.agregar("valoracion", "FALLO_VALORACION_FUTUROS", "ERROR", descripcion=str(e)[:200])
+            paso(f"Valoracion Futuros: fallo ({str(e)[:80]})")
+    else:
+        paso("Valoracion Futuros: omitida (sin insumos/vector_precios.csv)")
 
     # Archivo de controles formulado (verificacion trazable en Excel)
     ruta_ctrl = controles.generar(clas, cfg.dir_corte(), cfg.corte)
