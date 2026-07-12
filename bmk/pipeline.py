@@ -142,13 +142,34 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
         try:
             trm = fx.trm(arch.formato_351)
             fx_map = {"USD": trm, "COP": 1.0}
+            local_fut, intl_fut = valoracion_futuros.valorar(arch.formato_415, fx=fx_map)
             ruta_fut = valoracion_futuros.escribir(arch.formato_415, cfg.dir_corte(), cfg.corte, fx=fx_map)
             paso(f"Valoracion Futuros Industria: {ruta_fut}")
+            # Alertar futuros internacionales sin precio en el vector (instrumento nuevo).
+            nuevos = intl_fut[intl_fut["precio_vector"].isna()] if len(intl_fut) else intl_fut
+            for _, r in nuevos.iterrows():
+                reg.agregar("valoracion", "FUTURO_INT_NO_VALORADO", "WARN",
+                            afp=r.get("afp", ""), portafolio=r.get("portafolio", ""),
+                            nemo=str(r.get("subyacente", "")), moneda=str(r.get("moneda", "")),
+                            descripcion=f"Futuro internacional con subyacente '{r.get('subyacente','')}' "
+                                        f"(tipo {r.get('tipo','')}) no esta en el diccionario de indices "
+                                        f"ni en el VECTOR DE PRECIOS; no se pudo valorar.",
+                            accion_sugerida="Mapear el subyacente a su indice y agregar su precio al vector.")
         except Exception as e:  # noqa: BLE001
             reg.agregar("valoracion", "FALLO_VALORACION_FUTUROS", "ERROR", descripcion=str(e)[:200])
             paso(f"Valoracion Futuros: fallo ({str(e)[:80]})")
     else:
         paso("Valoracion Futuros: omitida (sin insumos/vector_precios.csv)")
+
+    # Sabana de condiciones faciales de swaps (insumo del motor de valoracion v6).
+    try:
+        from bmk.pricing.swaps import sabana as swap_sabana
+        ruta_sab = swap_sabana.escribir(arch.formato_415, cfg.dir_corte(), cfg.corte)
+        n_sab = len(swap_sabana.construir(arch.formato_415))
+        paso(f"Sabana condiciones faciales swaps: {n_sab} swaps -> {ruta_sab}")
+    except Exception as e:  # noqa: BLE001
+        reg.agregar("swaps", "FALLO_SABANA_SWAPS", "ERROR", descripcion=str(e)[:200])
+        paso(f"Sabana swaps: fallo ({str(e)[:80]})")
 
     # Archivo de controles formulado (verificacion trazable en Excel)
     ruta_ctrl = controles.generar(clas, cfg.dir_corte(), cfg.corte)

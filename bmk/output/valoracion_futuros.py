@@ -42,14 +42,21 @@ def _norm_415(formato_415: pd.DataFrame, tipo: int, solo_industria: bool) -> pd.
     return df
 
 
+def valorar(formato_415: pd.DataFrame, vector_path: str | Path = "insumos/vector_precios.csv",
+            fx: dict | None = None, solo_industria: bool = True):
+    """Devuelve (locales, internacionales) valorados."""
+    vector = Vector(vector_path)
+    local = valorar_local(_norm_415(formato_415, 5, solo_industria), vector)
+    intl = valorar_int(_norm_415(formato_415, 6, solo_industria), vector, fx)
+    return local, intl
+
+
 def escribir(formato_415: pd.DataFrame, out_dir: str | Path, corte: str,
              vector_path: str | Path = "insumos/vector_precios.csv",
              fx: dict | None = None, solo_industria: bool = True) -> str:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    vector = Vector(vector_path)
-    local = valorar_local(_norm_415(formato_415, 5, solo_industria), vector)
-    intl = valorar_int(_norm_415(formato_415, 6, solo_industria), vector, fx)
+    local, intl = valorar(formato_415, vector_path, fx, solo_industria)
     dest = out_dir / f"valoracion_futuros_industria_{corte}.xlsx"
     with pd.ExcelWriter(dest, engine="xlsxwriter") as xw:
         local.to_excel(xw, sheet_name="FutLoc Industria", index=False)
