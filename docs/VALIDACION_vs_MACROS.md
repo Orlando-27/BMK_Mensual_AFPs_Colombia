@@ -122,19 +122,53 @@ buckets de emisor alinean*, no cuánto nominal coincide; cada fila FCPE calcula
 3 filas FCP y las 6 CSA ya documentadas. Queda pendiente (opcional) homologar
 etiquetas de emisor para que el 99,92% suba a 100% también a nivel de bucket.
 
-## ⚠️ Derivados — NO incluidos aún
+## Derivados — INCLUIDOS (estructura al 100%)
 
-Las 15.714 filas comparadas son **solo activos + CSA**. La hoja Benchmark de las
-macros tiene **18.638 filas**: 15.714 activos/CSA **+ 2.924 derivados** (IRS 2.430,
-CCS 254, forwards ~240). La hoja que genera el pipeline **aún no incluye los
-derivados**; es el siguiente paso para replicar la hoja completa.
+La hoja Benchmark de las macros tiene **18.638 filas**: 15.714 activos/CSA **+
+2.924 derivados**. El pipeline ahora genera esas filas (`bmk.derivatives.benchmark_rows`)
+y la hoja completa **cuadra en número de filas exacto (18.638 = 18.638, diff 0)**.
+
+Estructura de derivados replicada al detalle (corte abril, industria):
+
+| Tipo | Macros | Pipeline | Detalle |
+|---|---:|---:|---|
+| FORWARD | 210 | 210 | 15 (afp,port) × 14 divisas (FWUSD..FWKRW) |
+| OPCIONES | 30 | 30 | 15 (afp,port) × 2 (OPT USD, OPT EUR) |
+| SWAP | 2.684 | 2.684 | 2 patas/contrato; **IRS 2.430 / CCS 254 exacto** |
+
+Los nocionales de swap salen del archivo (`nominal_derecho/obligacion`) y casan
+al peso (ej. 3.000.000, 10.000.000). La regla IRS/CCS (misma moneda ambas patas =
+IRS) reproduce el split 2.430/254 **exacto**.
+
+### Valor de mercado de derivados — requiere insumos de curvas del corte
+
+La **estructura** (filas, nocionales, tipo) está al 100%. El **valor de mercado**
+de cada derivado necesita insumos que NO viajan en el archivo SFC:
+
+- **Forwards**: las macros revaluan cada pata a la fecha de corrida (~10 días
+  después del corte) con la curva de puntos forward (hoja `Curvas` /
+  `Sensibilidad_Fwds`). Usando el valor presente por pata que reporta el propio
+  archivo (Formato_415 col 53/54) se obtiene el valor **al corte**, ~5-16% por
+  debajo del de las macros (signos y divisas cero coinciden). Cerrar al peso
+  requiere la curva de puntos forward del corte.
+- **Swaps**: el VPN por pata lo produce el motor v6 (`bmk.pricing`) con las curvas
+  del corte. El repo trae curvas de 2026-03-31; para el corte de abril hacen falta
+  las curvas de 2026-04-30 (IBR, USDOIS, LIBOR*, USDCO, etc.).
+- **Opciones**: en el Benchmark de las macros la mayoría son 0; se revaluan aparte.
+
+Nota: la hoja se importa en la herramienta diaria donde las columnas formuladas se
+arrastran; el valor de mercado de derivados es dato (no re-derivable por fórmula,
+porque los forwards se colapsan a divisa) y se completa en la etapa de valoración.
 
 ## Opcionales / pendientes
 
-1. **Incluir derivados** (forwards, futuros, swaps) como filas de la hoja Benchmark.
-2. Afinar nominal de DEPVE (moneda extranjera) y bonos especiales.
-3. Reemplazar el precio proxy por el del vector del corte.
-4. Homologar etiquetas de emisor (CSA/FCP) — cosmético.
+1. **Valor de mercado de derivados**: curva de puntos forward + curvas de swap del
+   corte (2026-04-30) para cerrar al peso.
+2. Etiqueta de pata swap TF/TV por pata fija/flotante (hoy derecho=TF/obligación=TV;
+   totales exactos, sólo cambia el rótulo de ~12 filas).
+3. Afinar nominal de DEPVE (moneda extranjera) y bonos especiales.
+4. Reemplazar el precio proxy por el del vector del corte.
+5. Homologar etiquetas de emisor/AFP (CSA/FCP; SKANDIA↔OLD MUTUAL) — cosmético.
 
 ## Herramienta
 

@@ -23,7 +23,7 @@ from bmk.config.settings import Config
 from bmk.ingest import sfc
 from bmk.prepare import normalize, csa as csamod, fx
 from bmk.classify import classifier, detector
-from bmk.derivatives import router, forwards, swaps as swp
+from bmk.derivatives import router, forwards, swaps as swp, benchmark_rows as der_rows
 from bmk.consolidate import benchmark, reconcile
 from bmk.output import excel, hoja_benchmark, controles
 from bmk.alerts.registry import RegistroAlertas
@@ -114,8 +114,13 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
     csa_rows = csamod.extraer_csa(arch.cuentas_csa, trm)
     paso(f"CSA: {len(csa_rows)} cuentas internacionales (TRM {trm:,.2f} del archivo)")
 
+    # Filas de derivados (forwards/opciones/swaps) para la hoja Benchmark.
+    der = der_rows.generar(arch.formato_415)
+    paso(f"Derivados hoja: {len(der)} filas ({(der['clasificacion']=='FORWARD').sum()} fwd, "
+         f"{(der['clasificacion']=='OPCIONES').sum()} opt, {(der['clasificacion']=='SWAP').sum()} swap)")
+
     # Hoja Benchmark para importar en la herramienta diaria (solo datos; formulas vacias)
-    ruta_hoja = hoja_benchmark.escribir(clas, cfg.dir_corte(), cfg.corte, csa=csa_rows)
+    ruta_hoja = hoja_benchmark.escribir(clas, cfg.dir_corte(), cfg.corte, csa=csa_rows, derivados=der)
     paso(f"Hoja Benchmark (importar): {ruta_hoja}")
 
     # Archivo de controles formulado (verificacion trazable en Excel)
