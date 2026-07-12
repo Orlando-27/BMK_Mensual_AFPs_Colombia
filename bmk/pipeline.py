@@ -25,7 +25,7 @@ from bmk.prepare import normalize, csa as csamod, fx
 from bmk.classify import classifier, detector
 from bmk.derivatives import router, forwards, swaps as swp, benchmark_rows as der_rows
 from bmk.consolidate import benchmark, reconcile
-from bmk.output import excel, hoja_benchmark, controles
+from bmk.output import excel, hoja_benchmark, controles, valoracion_fwds
 from bmk.alerts.registry import RegistroAlertas
 
 
@@ -122,6 +122,19 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
     # Hoja Benchmark para importar en la herramienta diaria (solo datos; formulas vacias)
     ruta_hoja = hoja_benchmark.escribir(clas, cfg.dir_corte(), cfg.corte, csa=csa_rows, derivados=der)
     paso(f"Hoja Benchmark (importar): {ruta_hoja}")
+
+    # Valoracion de forwards de la industria (replica hoja Fwd Industria).
+    ruta_fwd = None
+    if Path("insumos/fwd_curves/paridades.csv").exists():
+        try:
+            fwd415 = valoracion_fwds.normalizar_415(arch.formato_415)
+            ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte)
+            paso(f"Valoracion Fwds Industria: {len(fwd415)} forwards -> {ruta_fwd}")
+        except Exception as e:  # noqa: BLE001
+            reg.agregar("valoracion", "FALLO_VALORACION_FWDS", "ERROR", descripcion=str(e)[:200])
+            paso(f"Valoracion Fwds: fallo ({str(e)[:80]})")
+    else:
+        paso("Valoracion Fwds: omitida (sin curvas en insumos/fwd_curves)")
 
     # Archivo de controles formulado (verificacion trazable en Excel)
     ruta_ctrl = controles.generar(clas, cfg.dir_corte(), cfg.corte)
