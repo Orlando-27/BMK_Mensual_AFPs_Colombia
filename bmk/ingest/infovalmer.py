@@ -47,12 +47,17 @@ def _yyyymmdd(fecha: str) -> str:
 
 
 def _leer_txt_curva(path: Path) -> pd.DataFrame:
-    """Lee 'plazo valor' separado por espacios -> DataFrame [Dias, Tasa]."""
-    df = pd.read_csv(path, sep=r"\s+", header=None, names=["Dias", "Tasa"],
-                     engine="python")
-    df["Dias"] = pd.to_numeric(df["Dias"], errors="coerce")
-    df["Tasa"] = pd.to_numeric(df["Tasa"], errors="coerce")
-    return df.dropna()
+    """Lee un archivo de curva separado por espacios y toma la 1a columna como
+    Dias (plazo) y la 2a como Tasa (mid). Los SwapCC_* traen 2 columnas
+    (plazo, tasa); los Fwd_<par> traen 4 (plazo, mid, bid, ask) -> se ignoran
+    bid/ask. (Antes se usaba names=[Dias,Tasa], que con 4 columnas tomaba las
+    ULTIMAS dos = bid/ask y perdia el plazo, rompiendo la interpolacion.)"""
+    df = pd.read_csv(path, sep=r"\s+", header=None, engine="python")
+    out = pd.DataFrame({
+        "Dias": pd.to_numeric(df.iloc[:, 0], errors="coerce"),
+        "Tasa": pd.to_numeric(df.iloc[:, 1], errors="coerce"),
+    })
+    return out.dropna()
 
 
 def _leer_matriz(path: Path) -> pd.DataFrame:
