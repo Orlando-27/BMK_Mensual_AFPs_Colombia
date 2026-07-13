@@ -44,8 +44,8 @@ def _norm(s: str) -> str:
                    if not unicodedata.combining(c)).upper().strip()
 
 
-def leer_macro(path: str) -> pd.DataFrame:
-    """Neto y bruto por ISIN de las filas de swap del Benchmark macro."""
+def _leer_macro_patas(path: str) -> pd.DataFrame:
+    """Filas crudas (una por pata) de los swaps del Benchmark macro."""
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     ws = wb["Benchmark"]
     filas = []
@@ -56,21 +56,45 @@ def leer_macro(path: str) -> pd.DataFrame:
         if clasif != "SWAP":
             continue
         ident = str(r[2]).strip() if r[2] is not None else ""
-        clas = _norm(r[5])  # IRS / CCS
-        nemo = _norm(r[3])  # SWAP TF / SWAP TV
-        vr = pd.to_numeric(r[11], errors="coerce")
-        precio = pd.to_numeric(r[20], errors="coerce")
-        filas.append((ident, clas, nemo, vr, precio))
+        filas.append((
+            ident,
+            _norm(r[5]),                       # clas: IRS / CCS
+            _norm(r[3]),                       # nemo: SWAP TF / SWAP TV
+            _norm(r[9]),                       # moneda de la pata
+            pd.to_numeric(r[10], errors="coerce"),   # nominal
+            pd.to_numeric(r[11], errors="coerce"),   # Vr Mercado INICIAL (con signo)
+            pd.to_numeric(r[20], errors="coerce"),   # Precio inicial
+        ))
     wb.close()
-    d = pd.DataFrame(filas, columns=["isin", "clas", "nemo", "vr", "precio"])
-    d = d[d["isin"] != ""]
+    d = pd.DataFrame(filas, columns=["isin", "clas", "nemo", "moneda", "nominal", "vr", "precio"])
+    return d[d["isin"] != ""].reset_index(drop=True)
+
+
+def _subtipo(monedas: set[str]) -> str:
+    """IBRCOP si ambas patas COP; SOFUSD si hay USD; si no, mezcla de la clas."""
+    m = {x for x in monedas if x}
+    if m == {"COP"}:
+        return "IBRCOP"
+    if "USD" in m and "COP" not in m:
+        return "SOFUSD"
+    if m == {"COP", "USD"}:
+        return "COPUSD"
+    return "/".join(sorted(m)) or "?"
+
+
+def leer_macro(path: str) -> pd.DataFrame:
+    """Neto y bruto por ISIN de las filas de swap del Benchmark macro."""
+    d = _leer_macro_patas(path)
     g = d.groupby("isin").agg(
         clas=("clas", "first"),
         n_patas=("vr", "size"),
         macro_neto=("vr", "sum"),
         macro_bruto=("vr", lambda s: s.abs().sum()),
+        macro_tf=("vr", lambda s: s[d.loc[s.index, "nemo"] == "SWAP TF"].sum()),
+        macro_tv=("vr", lambda s: s[d.loc[s.index, "nemo"] == "SWAP TV"].sum()),
         precio_min=("precio", "min"),
         precio_max=("precio", "max"),
+        subtipo=("moneda", lambda s: _subtipo(set(s))),
     ).reset_index()
     return g
 
@@ -91,13 +115,46 @@ def leer_mio(path: str) -> pd.DataFrame:
     })
 
 
+def drilldown(macro_path: str, mio_path: str, isin: str) -> int:
+    """Detalle pata a pata de un contrato: macro (2 filas) vs mi der/obl."""
+    d = _leer_macro_patas(macro_path)
+    md = d[d["isin"].astype(str) == str(isin)]
+    print(f"=== MACRO (Benchmark) contrato {isin} ===")
+    if md.empty:
+        print("  (no encontrado en el macro)")
+    else:
+        pd.options.display.float_format = lambda x: f"{x:,.2f}"
+        print(md[["nemo", "clas", "moneda", "nominal", "vr", "precio"]].to_string(index=False))
+        print(f"  neto (suma patas firmadas): {md['vr'].sum():,.0f} COP")
+
+    o = pd.read_csv(mio_path)
+    mo = o[o["ISIN"].astype(str) == str(isin)]
+    print(f"\n=== MIO (motor v6) contrato {isin} ===")
+    if mo.empty:
+        print("  (no encontrado en mi valoracion)")
+    else:
+        cols = ["Tipo_Swap", "VPN_Derecho_Calc", "Precio_Der", "Duracion_Mod_Der", "Curva_Disc_Der",
+                "VPN_Oblig_Calc", "Precio_Obl", "Duracion_Mod_Obl", "Curva_Disc_Obl"]
+        cols = [c for c in cols if c in mo.columns]
+        for c in cols:
+            print(f"  {c:20} = {mo.iloc[0][c]}")
+        der = pd.to_numeric(mo.iloc[0].get("VPN_Derecho_Calc"), errors="coerce")
+        obl = pd.to_numeric(mo.iloc[0].get("VPN_Oblig_Calc"), errors="coerce")
+        print(f"  neto (der - obl)     = {der - obl:,.0f} COP")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--macro", required=True)
     ap.add_argument("--mio", required=True)
     ap.add_argument("--top", type=int, default=25)
+    ap.add_argument("--isin", help="Drill-down: imprime las 2 patas del macro y mi der/obl para ese contrato")
     ap.add_argument("--out")
     a = ap.parse_args()
+
+    if a.isin:
+        return drilldown(a.macro, a.mio, a.isin)
 
     macro = leer_macro(a.macro)
     mio = leer_mio(a.mio)
@@ -113,9 +170,9 @@ def main() -> int:
     b["dif_neto"] = b["mio_neto"] - b["macro_neto"]
     b["dif_bruto_%"] = (b["mio_bruto"] - b["macro_bruto"]) / b["macro_bruto"].abs().replace(0, float("nan")) * 100
 
-    # Resumen por clasificacion (IRS/CCS).
+    # Resumen por subtipo (IBRCOP / SOFUSD / COPUSD / ...).
     pd.options.display.float_format = lambda x: f"{x:,.1f}"
-    res = b.groupby("clas").agg(
+    res = b.groupby("subtipo").agg(
         n=("isin", "size"),
         macro_neto_MM=("macro_neto", lambda s: s.sum() / 1e6),
         mio_neto_MM=("mio_neto", lambda s: s.sum() / 1e6),
@@ -123,7 +180,8 @@ def main() -> int:
         mio_bruto_B=("mio_bruto", lambda s: s.sum() / 1e12),
     ).reset_index()
     res["dif_neto_MM"] = res["mio_neto_MM"] - res["macro_neto_MM"]
-    print("=== Resumen por clasificacion (neto en millones, bruto en billones) ===")
+    res["dif_bruto_%"] = (res["mio_bruto_B"] - res["macro_bruto_B"]) / res["macro_bruto_B"].abs() * 100
+    print("=== Resumen por subtipo (neto en millones, bruto en billones) ===")
     print(res.to_string(index=False))
 
     print(f"\n=== Top {a.top} swaps por |dif de neto| (millones COP) ===")
