@@ -40,17 +40,22 @@ import pandas as pd
 #   "COP" : tasa en COP por unidad extranjera (USDCOP)
 #   "USDX": USD/XXX -> COP = TRM*tasa (EURUSD, AUDUSD, GBPUSD)
 #   "XUSD": XXX/USD -> COP = TRM/tasa (USDBRL, USDMXN, USDJPY, USDCLP, USDCAD, USDCHF)
+# Puntos forward: el Benchmark macro aplica puntos significativos SOLO a USDCOP
+# (y pequenos a USDBRL/USDMXN). A los cruces (EURUSD, AUDUSD, GBPUSD, USDJPY,
+# USDCLP, USDCAD, USDCHF) los valora ~a spot (puntos despreciables), asi que se
+# dejan en None (forward = spot descontado). Verificado contract-level contra la
+# hoja 'Fwd Industria' del corte 2026-05-31: los cruces tienen puntos_macro ~0.
 PARES = {
     "USDCOP": ("COP", "FWPCOP"),
-    "EURUSD": ("USDX", "FWPEUR"),
-    "AUDUSD": ("USDX", None),   # sin puntos (el forward = spot descontado)
-    "GBPUSD": ("USDX", None),   # sin puntos (el forward = spot descontado)
     "USDBRL": ("XUSD", "FWPBRL"),
     "USDMXN": ("XUSD", "FWPMXN"),
-    "USDJPY": ("XUSD", "FWPJPY"),
-    "USDCLP": ("XUSD", "FWPCLP"),
-    "USDCAD": ("XUSD", "FWPCAD"),
-    "USDCHF": ("XUSD", "FWPCHF"),
+    "EURUSD": ("USDX", None),
+    "AUDUSD": ("USDX", None),
+    "GBPUSD": ("USDX", None),
+    "USDJPY": ("XUSD", None),
+    "USDCLP": ("XUSD", None),
+    "USDCAD": ("XUSD", None),
+    "USDCHF": ("XUSD", None),
 }
 # par -> moneda extranjera cuyo spot (de paridades.csv) usar como spot del par.
 SPOT_MONEDA = {"USDCOP": "USD", "EURUSD": "EUR", "AUDUSD": "AUD", "GBPUSD": "GBP",
