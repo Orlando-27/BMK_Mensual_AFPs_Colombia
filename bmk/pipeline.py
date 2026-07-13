@@ -123,20 +123,9 @@ def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None) -> dict:
     csa_rows = csamod.extraer_csa(arch.cuentas_csa, trm)
     paso(f"CSA: {len(csa_rows)} cuentas internacionales (TRM {trm:,.2f} del archivo)")
 
-    # Filas de derivados (forwards/opciones/swaps) para la hoja Benchmark.
-    der = der_rows.generar(arch.formato_415)
-    if vpn_swaps is not None and len(vpn_swaps):
-        der = der_rows.inyectar_vpn_swaps(der, vpn_swaps)
-        n_val = int(((der["clasificacion"] == "SWAP") & der["vr_mercado"].notna()).sum())
-        paso(f"Swaps valorados (VPN v6) inyectados: {n_val} patas")
-    paso(f"Derivados hoja: {len(der)} filas ({(der['clasificacion']=='FORWARD').sum()} fwd, "
-         f"{(der['clasificacion']=='OPCIONES').sum()} opt, {(der['clasificacion']=='SWAP').sum()} swap)")
-
-    # Hoja Benchmark para importar en la herramienta diaria (solo datos; formulas vacias)
-    ruta_hoja = hoja_benchmark.escribir(clas, cfg.dir_corte(), cfg.corte, csa=csa_rows, derivados=der)
-    paso(f"Hoja Benchmark (importar): {ruta_hoja}")
-
     # Valoracion de forwards de la industria (replica hoja Fwd Industria).
+    # Se calcula ANTES de la hoja Benchmark para poder inyectar el valor revaluado
+    # (curva de puntos) en las filas de forward en vez del proxy SFC col 53/54.
     ruta_fwd = None
     fwd_val = trm_val = local_fut = intl_fut = swap_sab = None
     dir_curvas = _insumo("fwd_curves")
@@ -146,7 +135,7 @@ def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None) -> dict:
             curvas = Curvas(dir_curvas)
             fecha_v = valoracion_fwds.corte_a_serial(cfg.corte)
             fwd415 = valoracion_fwds.normalizar_415(arch.formato_415)
-            fwd_val = valorar(fwd415, curvas, fecha_v)  # df crudo (para controles)
+            fwd_val = valorar(fwd415, curvas, fecha_v)  # df crudo (para controles e inyeccion)
             ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte, dir_curvas=dir_curvas)
             # Futuros de TRM (tipo 4) valorados con el mismo motor.
             trm415 = valoracion_fwds.normalizar_415(arch.formato_415, tipo_derivado=4)
@@ -158,6 +147,22 @@ def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None) -> dict:
             paso(f"Valoracion Fwds: fallo ({str(e)[:80]})")
     else:
         paso("Valoracion Fwds: omitida (sin curvas en insumos/fwd_curves)")
+
+    # Filas de derivados (forwards/opciones/swaps) para la hoja Benchmark.
+    der = der_rows.generar(arch.formato_415)
+    if fwd_val is not None and len(fwd_val):
+        der = der_rows.inyectar_valor_forwards(der, fwd_val)
+        paso("Forwards revaluados (curva de puntos) inyectados en la hoja")
+    if vpn_swaps is not None and len(vpn_swaps):
+        der = der_rows.inyectar_vpn_swaps(der, vpn_swaps)
+        n_val = int(((der["clasificacion"] == "SWAP") & der["vr_mercado"].notna()).sum())
+        paso(f"Swaps valorados (VPN v6) inyectados: {n_val} patas")
+    paso(f"Derivados hoja: {len(der)} filas ({(der['clasificacion']=='FORWARD').sum()} fwd, "
+         f"{(der['clasificacion']=='OPCIONES').sum()} opt, {(der['clasificacion']=='SWAP').sum()} swap)")
+
+    # Hoja Benchmark para importar en la herramienta diaria (solo datos; formulas vacias)
+    ruta_hoja = hoja_benchmark.escribir(clas, cfg.dir_corte(), cfg.corte, csa=csa_rows, derivados=der)
+    paso(f"Hoja Benchmark (importar): {ruta_hoja}")
 
     # Valoracion de futuros (locales TES + internacionales), replica FutLoc/FutInt.
     ruta_fut = None

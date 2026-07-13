@@ -168,6 +168,37 @@ def inyectar_vpn_swaps(der: pd.DataFrame, vpn_df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def inyectar_valor_forwards(der: pd.DataFrame, fwd_val: pd.DataFrame) -> pd.DataFrame:
+    """Reemplaza el valor de mercado de las filas de FORWARD (que por defecto usan
+    el valor presente del propio SFC, col 53/54, al corte) por el valor revaluado
+    con la curva de puntos forward (motor fwd_valuator, como la hoja Fwd Industria
+    del macro). Se netea por (afp, portafolio, divisa) igual que _forwards.
+
+    fwd_val: salida de bmk.pricing.fwd_valuator.valorar (columnas afp, portafolio,
+    mder, mobl, valor_cop_der, valor_cop_obli). Solo se sobrescriben las divisas
+    cubiertas por el valorador (pares en PARES); el resto conserva el proxy SFC."""
+    if der is None or der.empty or fwd_val is None or fwd_val.empty:
+        return der
+    fv = fwd_val.copy()
+    fv["mder"] = _norm_cur(fv["mder"])
+    fv["mobl"] = _norm_cur(fv["mobl"])
+    der_sum = fv.groupby(["afp", "portafolio", "mder"])["valor_cop_der"].sum()
+    obl_sum = fv.groupby(["afp", "portafolio", "mobl"])["valor_cop_obli"].sum()
+    cubiertas = set(fv["mder"].dropna()) | set(fv["mobl"].dropna())
+    out = der.copy()
+    es_fwd = out["clasificacion"].astype(str).str.upper() == "FORWARD"
+    nueva = out["vr_mercado"].copy()
+    for i in out.index[es_fwd]:
+        cur = out.at[i, "moneda"]
+        if cur not in cubiertas:
+            continue  # divisa sin curva de puntos -> se deja el proxy SFC
+        afp, port = out.at[i, "afp"], out.at[i, "cod_portafolio"]
+        v = float(der_sum.get((afp, port, cur), 0.0)) - float(obl_sum.get((afp, port, cur), 0.0))
+        nueva[i] = v
+    out["vr_mercado"] = nueva
+    return out
+
+
 def generar(formato_415: pd.DataFrame, solo_industria: bool = True) -> pd.DataFrame:
     """Filas de derivados (forwards + opciones + swaps) en el esquema de activos."""
     if formato_415 is None or formato_415.empty:
