@@ -38,7 +38,8 @@ def _insumo(nombre: str) -> Path:
     return p if p.exists() else Path("insumos_demo") / nombre
 
 
-def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None) -> dict:
+def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None,
+           fecha_fwd: str | None = None) -> dict:
     reg = RegistroAlertas(corte=cfg.corte)
     log: list[str] = []
 
@@ -133,7 +134,10 @@ def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None) -> dict:
         try:
             from bmk.pricing.fwd_valuator import Curvas, valorar
             curvas = Curvas(dir_curvas)
-            fecha_v = valoracion_fwds.corte_a_serial(cfg.corte)
+            # El macro revalua los forwards a la fecha de PUBLICACION (~10 dias
+            # despues del corte), no al corte. Si se pasa fecha_fwd (con curvas de
+            # esa fecha en fwd_curves), se valora a esa fecha.
+            fecha_v = valoracion_fwds.corte_a_serial(fecha_fwd or cfg.corte)
             fwd415 = valoracion_fwds.normalizar_415(arch.formato_415)
             fwd_val = valorar(fwd415, curvas, fecha_v)  # df crudo (para controles e inyeccion)
             ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte, dir_curvas=dir_curvas)
@@ -150,12 +154,12 @@ def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None) -> dict:
 
     # Filas de derivados (forwards/opciones/swaps) para la hoja Benchmark.
     der = der_rows.generar(arch.formato_415)
-    # NOTA: la inyeccion del valor revaluado de forwards (inyectar_valor_forwards)
-    # queda DESHABILITADA. El macro valora los forwards con una matriz de posicion
-    # neta x sensibilidad de spot (hoja 'Fwd Industria'), no sumando el P&G
-    # contrato por contrato; ademas los puntos INFOVALMER requieren escala por par.
-    # Mientras se replica esa metodologia, las filas de forward usan el valor
-    # presente del propio SFC (col 53/54) como proxy (~-27.5% vs macro).
+    # Inyecta el valor revaluado de forwards (motor fwd_valuator, metodologia
+    # bi-moneda del macro) en vez del proxy SFC col 53/54. El MtM (pyg) se atribuye
+    # a la divisa del par. Requiere haber valorado a la fecha de publicacion.
+    if fwd_val is not None and len(fwd_val):
+        der = der_rows.inyectar_valor_forwards(der, fwd_val)
+        paso("Forwards revaluados (bi-moneda) inyectados en la hoja")
     if vpn_swaps is not None and len(vpn_swaps):
         der = der_rows.inyectar_vpn_swaps(der, vpn_swaps)
         n_val = int(((der["clasificacion"] == "SWAP") & der["vr_mercado"].notna()).sum())

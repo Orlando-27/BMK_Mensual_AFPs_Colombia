@@ -123,21 +123,33 @@ def valorar(fwd: pd.DataFrame, curvas: Curvas, fecha_valoracion: int) -> pd.Data
             tv.append(0.0); tf.append(0.0); der.append(0.0); obl.append(0.0)
             pyg.append(0.0); plazo.append(t); spots.append(None)
             continue
-        # COP-quoted (USDCOP) descuenta con la tasa COP (FWTCOP); los cruzados
-        # USD/XXX y XXX/USD descuentan con la tasa foranea USD (LIBBTS).
-        curva_desc = "FWTCOP" if tipo == "COP" else "LIBBTS"
-        rl = curvas.interp(curva_desc, t) / 100.0
-        df = 1.0 / (1.0 + rl * t / 360.0)
+        # Metodologia del macro (paridad cubierta, SIN puntos): la pata del strike
+        # (COP) se descuenta con la tasa domestica COP (FWTCOP) y la pata spot (USD)
+        # con la foranea USD (LIBBTS):
+        #     Tasa VPN     = strike x DF_COP
+        #     Tasa Forward = spot   x DF_USD
+        #     P&G          = (VPN - Forward) x nominal   (VENTA; se invierte en COMPRA)
+        # Verificado contract-level contra la hoja 'Fwd Industria'. Para los cruces
+        # (no-COP) se usa un solo DF foraneo (spot ~ forward, puntos despreciables).
+        r_cop = curvas.interp("FWTCOP", t) / 100.0
+        df_cop = 1.0 / (1.0 + r_cop * t / 360.0)
+        r_usd = curvas.interp("LIBBTS", t) / 100.0
+        df_usd = 1.0 / (1.0 + r_usd * t / 360.0)
         spot = r["spot"] if "spot" in out.columns and pd.notna(r.get("spot")) else curvas.spot.get(SPOT_MONEDA.get(par, ""), 0.0)
         # Normalizar el strike a la convencion de cotizacion del par: si viene
         # invertido (p. ej. USDJPY 0.0064 en vez de 156), 1/strike queda mas cerca
         # del spot -> invertir. No afecta strikes ya correctos (SABANA validada).
         if K > 0 and spot > 0 and abs(math.log(K / spot)) > abs(math.log((1.0 / K) / spot)):
             K = 1.0 / K
-        pts = curvas.interp(curva_pts, t) if curva_pts else 0.0
-        mkt = spot + pts
-        tasa_vpn = K * df
-        tasa_fwd = mkt * df
+        if tipo == "COP":
+            tasa_vpn = K * df_cop        # pata strike, descuento COP
+            tasa_fwd = spot * df_usd     # pata spot, descuento USD
+        else:
+            # Cruces (USDX/XUSD): el macro NO descuenta ni aplica puntos (DF~1),
+            # asi que Tasa VPN = strike y Tasa Forward = spot. Verificado contra la
+            # hoja Fwd Industria (p.ej. USDBRL: P&G = nom*trm*(1/spot - 1/strike)).
+            tasa_vpn = K
+            tasa_fwd = spot
         v_pact = _valor_pata(tipo, nom, tasa_vpn, curvas.trm)
         v_mkt = _valor_pata(tipo, nom, tasa_fwd, curvas.trm)
         op = str(r["operacion"]).strip().upper()

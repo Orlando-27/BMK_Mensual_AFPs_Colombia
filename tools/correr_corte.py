@@ -32,19 +32,26 @@ def main() -> int:
     ap.add_argument("--mes", required=True)
     ap.add_argument("--anio", type=int, required=True)
     ap.add_argument("--sfc", required=True, help="Archivo SFC del corte")
+    ap.add_argument("--curvas-pub", help="Carpeta de curvas de la fecha de PUBLICACION "
+                    "(para revaluar forwards como el macro). Si se omite, se usa el corte.")
+    ap.add_argument("--fecha-pub", help="AAAA-MM-DD de publicacion (fecha de valoracion de forwards)")
     a = ap.parse_args()
 
-    print("=== 1. Curvas forward reales -> insumos/fwd_curves ===")
-    infovalmer.preparar_forwards(a.curvas, a.corte, "insumos/fwd_curves")
-    print("    ok (FWPCOP/FWTCOP/LIBBTS + puntos por par + paridades)")
+    # Forwards: el macro los revalua a la fecha de PUBLICACION con las curvas de ese
+    # dia. Si se pasan --curvas-pub/--fecha-pub, se preparan esas; si no, el corte.
+    fwd_curvas = a.curvas_pub or a.curvas
+    fwd_fecha = a.fecha_pub or a.corte
+    print(f"=== 1. Curvas forward ({fwd_fecha}) -> insumos/fwd_curves ===")
+    infovalmer.preparar_forwards(fwd_curvas, fwd_fecha, "insumos/fwd_curves")
+    print("    ok (FWTCOP/LIBBTS + paridades)")
 
     print("=== 2. Valoracion de swaps (motor v6) ===")
     res = correr_swaps.correr(a.curvas, a.corte, a.sfc, f"salidas/swaps/{a.corte}")
     vpn = res[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]] if "ISIN" in res.columns else None
 
-    print("=== 3. Pipeline completo (con VPN de swaps inyectado) ===")
+    print("=== 3. Pipeline completo (VPN swaps + forwards revaluados) ===")
     cfg = Config(anio=a.anio, mes=a.mes)
-    resumen = pipeline.correr(cfg, archivo=a.sfc, vpn_swaps=vpn)
+    resumen = pipeline.correr(cfg, archivo=a.sfc, vpn_swaps=vpn, fecha_fwd=fwd_fecha)
     print(f"\n[corte] salidas en {cfg.dir_corte()}")
     return 0
 
