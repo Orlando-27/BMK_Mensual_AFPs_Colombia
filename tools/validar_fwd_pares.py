@@ -53,16 +53,16 @@ def _leer_fwd(path: str) -> pd.DataFrame:
     m = {
         "paridad": col("PARIDAD"),
         "spot": col("SPOT"),
+        "strike_val": col("STRIKE"),
         "tasa_fwd": col("TASA FORWARD"),
         "tasa_vpn": col("TASA VPN"),
         "pyg": col("P&G", "PYG", "P Y G"),
-        "nominal": col("NOMINAL", "VALOR NOMINAL"),
     }
     faltan = [k for k, v in m.items() if v is None]
     if faltan:
         raise SystemExit(f"Faltan columnas {faltan} en {path}. Columnas: {list(df.columns)}")
     out = pd.DataFrame({k: df[v] for k, v in m.items()})
-    for c in ["spot", "tasa_fwd", "tasa_vpn", "pyg", "nominal"]:
+    for c in ["spot", "strike_val", "tasa_fwd", "tasa_vpn", "pyg"]:
         out[c] = pd.to_numeric(out[c], errors="coerce")
     out["paridad"] = out["paridad"].astype(str).str.strip().str.upper()
     return out.dropna(subset=["paridad", "spot"])
@@ -70,7 +70,9 @@ def _leer_fwd(path: str) -> pd.DataFrame:
 
 def _resumen(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    df["pts"] = df["tasa_fwd"] - df["spot"]   # puntos (aprox, sin desagregar DF)
+    # Puntos LIMPIOS: tasa_fwd = (spot + pts) x DF y tasa_vpn = strike x DF, luego
+    # DF = tasa_vpn/strike y pts = tasa_fwd/DF - spot = tasa_fwd*strike/tasa_vpn - spot.
+    df["pts"] = df["tasa_fwd"] * df["strike_val"] / df["tasa_vpn"] - df["spot"]
     return df.groupby("paridad").agg(
         n=("paridad", "size"),
         spot=("spot", "median"),
