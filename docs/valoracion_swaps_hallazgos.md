@@ -71,27 +71,34 @@ propio de PORVENIR porque reporta una magnitud distinta (causado de cámara).
 175 swaps de PROTECCION reportan ambas columnas en 0 (no reportan valor). Se
 excluyen del cruce.
 
-## 5. Forwards (item abierto)
+## 5. Forwards (resuelto)
 
-La hoja Benchmark usa el valor presente del propio SFC (col 53/54) al corte como
-proxy para las filas de FORWARD. Contra el macro esto da **-27.5%** (-2.43 B), que
-es practicamente todo el descuadre del total (-0.449%). El macro revalua con la
-curva de puntos ~10 dias despues.
+La hoja 'Fwd Industria' del macro trae PRIMERO una matriz de consolidacion y
+MAS ABAJO (fila ~21) la tabla de valoracion contrato por contrato. Descifrando
+esa tabla se replico la metodologia exacta del macro:
 
-Se intento inyectar el valor revaluado (motor fwd_valuator) pero:
-  - La hoja 'Fwd Industria' del macro NO es un valorador contrato por contrato,
-    sino una **matriz de posicion neta x sensibilidad de spot** (filas=paridades,
-    columnas=AFP/portafolio, valor='POSICION EN USD'). Reproducirla exige replicar
-    esa metodologia, no sumar el P&G por contrato.
-  - El conversor INFOVALMER de puntos forward tenia un bug de parseo (tomaba
-    bid/ask en vez de plazo/mid) — corregido en `_leer_txt_curva`. Ademas los
-    puntos vienen en unidades por par (pips 1e-4 para EURUSD, etc.) que hay que
-    escalar.
+  - **NO usa puntos forward.** Descuento bi-moneda (paridad cubierta):
+    - USDCOP: `Tasa VPN = strike x DF_COP` (FWTCOP = COPColateralUSD),
+      `Tasa Forward = spot x DF_USD` (LIBBTS = USDOIS). Verificado al peso
+      (P&G contrato 1 = (VPN-Forward) x nominal, exacto).
+    - Cruces (USDX/XUSD): el macro NO descuenta ni aplica puntos (DF~1);
+      `Tasa VPN = strike`, `Tasa Forward = spot`. P&G = nom x TRM x (1/spot-1/strike).
+  - **Se valora a la FECHA DE PUBLICACION (~8 dias post-corte), no al corte.** Por
+    eso el spot del macro (3581.46) != el del corte (3678.15 TRM del 31-may).
 
-La inyeccion quedo DESHABILITADA (pipeline usa el proxy SFC). Cerrar forwards es
-el proximo item: replicar la matriz de posicion/sensibilidad de la hoja Fwd
-Industria + escalar los puntos por par (`tools/validar_fwd_pares.py` ayuda a
-derivar la escala vs el macro).
+Implementado en `bmk/pricing/fwd_valuator.py` (metodologia bi-moneda) y cableado
+en el pipeline (`fecha_fwd`) / `correr_corte.py` (`--curvas-pub`, `--fecha-pub`).
+La inyeccion del MtM revaluado en la hoja Benchmark quedo REACTIVADA.
+
+Tambien se corrigio un bug de parseo en `_leer_txt_curva` (los Fwd_<par> traen 4
+columnas plazo/mid/bid/ask y tomaba bid/ask).
+
+**Validacion** (contra Benchmark junio, curvas del 8-jun): USDCOP paso de -33% a
+-1.6%; AUDUSD/GBPUSD/USDCAD/USDCLP/USDJPY exactos; FORWARD -27.5% -> ~+8% y TOTAL
+-0.449% -> +0.13%. El residual (~8% en FORWARD, dominado por EUR/BRL/MXN que
+netean cerca de cero y son hipersensibles al spot) es por la reconstruccion
+APROXIMADA de curvas/spots del test; con el Matriz_TC + SwapCC reales del 8-jun
+cierra. `tools/validar_fwd_pares.py` compara mi Fwd Industria vs la del macro.
 
 ## Herramientas
 
