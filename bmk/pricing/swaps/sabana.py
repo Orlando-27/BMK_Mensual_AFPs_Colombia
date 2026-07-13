@@ -6,20 +6,29 @@ consume el motor de valoracion v6 (swap_valuator_v6). Las condiciones faciales
 son las MISMAS para las 3 fechas de valoracion (el contrato no cambia); solo
 cambian los insumos de mercado (curvas, TRM/UVR/EURCOP) por fecha.
 
-Mapeo de columnas Formato_415 (0-based) -> condicion facial:
+Mapeo de columnas Formato_415 (0-based) -> condicion facial (nombres reales del
+formato de la SFC):
   0  entidad (AFP)                 11 numero de contrato (ISIN interno)
   4  cod. patrimonio               5  nombre patrimonio (-> portafolio)
   22 fecha celebracion (F.Compra)  23 fecha vencimiento (F.Vcto)
-  24 fecha liquidacion
-  Pata DERECHO:  26 moneda, 27 nominal, 37 indice tasa facial, 38 periodicidad,
-                 39 tasa facial, 40 base/modalidad
-  Pata OBLIG.:   28 moneda, 29 nominal, 41 indice tasa facial, 42 periodicidad,
-                 43 tasa facial, 44 base/modalidad
+  24 fecha liquidacion             45 base de calculo (UNA para ambas patas)
+  Pata DERECHO (flujos a RECIBIR): 26 moneda, 27 nominal,
+                 37 codigo tasa (FS/SOF/IBR), 38 indicador tasa,
+                 39 valor tasa fija o spread, 40 PERIODICIDAD
+  Pata OBLIG. (flujos a PAGAR):    28 moneda, 29 nominal,
+                 41 codigo tasa, 42 indicador tasa,
+                 43 valor tasa fija o spread, 44 PERIODICIDAD
 
-Codigos (convencion SFC; los numericos quedan por confirmar con el diccionario):
-  - Indice tasa facial: FS = tasa fija, SOF = SOFR, IBR = IBR.
-  - Periodicidad (col 38/42) y Base (col 40/44) vienen codificadas; se exponen el
-    codigo crudo y un mapeo tentativo para revision.
+Codigos:
+  - Codigo tasa (col 37/41): FS = tasa fija, SOF = SOFR, IBR = IBR.
+  - Periodicidad (col 40/44): decodificada empiricamente contra la Period. del
+    macro (SWAPIND, 1436 swaps): 3=Trimestral, 5=Semestral, 6=Anual, 7=Anual.
+  - Base (col 45): el motor v6 usa day-count por moneda (DAY_BASE), no esta
+    columna; se expone solo para la sabana. base 1/2 -> ACT/360 / ACT/365 aprox.
+
+NOTA: en la version anterior periodicidad se leia de col 38/42 (que son el
+INDICADOR fija/variable) y base de col 40/44 (que son la PERIODICIDAD real), lo
+que daba un schedule de cupones equivocado e inflaba la pata flotante ~10%.
 """
 from __future__ import annotations
 
@@ -33,12 +42,10 @@ from bmk.prepare.normalize import normalizar_afp, _cod_portafolio
 # Indice de la tasa facial (col 37/41). Fija vs flotantes.
 INDICE = {"FS": "Fija", "SOF": "SOFR", "IBR": "IBR", "DTF": "DTF", "IPC": "IPC", "UVR": "UVR"}
 
-# Mapeo tentativo de periodicidad (col 38/42) — POR CONFIRMAR con diccionario SFC.
-PERIODICIDAD = {1: "Al vencimiento", 2: "Anual", 3: "Semestral", 4: "Trimestral",
-                5: "Mensual", 6: "Bimestral", 7: "Cuatrimestral"}
-# Mapeo tentativo de base/day-count (col 40/44) — POR CONFIRMAR.
-BASE = {1: "30/360", 2: "ACT/365", 3: "ACT/360", 4: "ACT/ACT",
-        5: "30/360", 6: "ACT/360", 7: "ACT/365"}
+# Periodicidad (col 40/44) — decodificada contra la Period. del macro (SWAPIND).
+PERIODICIDAD = {3: "Trimestral", 5: "Semestral", 6: "Anual", 7: "Anual"}
+# Base de calculo (col 45) — cosmetica (el motor v6 usa DAY_BASE por moneda).
+BASE = {1: "ACT/360", 2: "ACT/365"}
 
 
 def _tipo_swap(ind_der, ind_obl, mon_der, mon_obl) -> str:
@@ -78,20 +85,20 @@ def construir(formato_415: pd.DataFrame, solo_industria: bool = True) -> pd.Data
         "f_compra": num(c(22)),
         "f_vcto": num(c(23)),
         "f_liquidacion": num(c(24)),
-        # Pata derecho
+        # Pata derecho (flujos a RECIBIR)
         "der_moneda": c(26).astype(str).str.upper().str.strip(),
         "der_nominal": num(c(27)),
         "der_indice_cod": c(37).astype(str).str.upper().str.strip(),
-        "der_periodicidad_cod": num(c(38)),
+        "der_periodicidad_cod": num(c(40)),
         "der_tasa_facial": num(c(39)),
-        "der_base_cod": num(c(40)),
-        # Pata obligacion
+        "der_base_cod": num(c(45)),
+        # Pata obligacion (flujos a PAGAR)
         "obl_moneda": c(28).astype(str).str.upper().str.strip(),
         "obl_nominal": num(c(29)),
         "obl_indice_cod": c(41).astype(str).str.upper().str.strip(),
-        "obl_periodicidad_cod": num(c(42)),
+        "obl_periodicidad_cod": num(c(44)),
         "obl_tasa_facial": num(c(43)),
-        "obl_base_cod": num(c(44)),
+        "obl_base_cod": num(c(45)),
     })
     df = df[tipo.isin([16, 17])].reset_index(drop=True)
     if solo_industria:
