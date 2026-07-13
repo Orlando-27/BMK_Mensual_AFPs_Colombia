@@ -150,9 +150,12 @@ def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None) -> dict:
 
     # Filas de derivados (forwards/opciones/swaps) para la hoja Benchmark.
     der = der_rows.generar(arch.formato_415)
-    if fwd_val is not None and len(fwd_val):
-        der = der_rows.inyectar_valor_forwards(der, fwd_val)
-        paso("Forwards revaluados (curva de puntos) inyectados en la hoja")
+    # NOTA: la inyeccion del valor revaluado de forwards (inyectar_valor_forwards)
+    # queda DESHABILITADA. El macro valora los forwards con una matriz de posicion
+    # neta x sensibilidad de spot (hoja 'Fwd Industria'), no sumando el P&G
+    # contrato por contrato; ademas los puntos INFOVALMER requieren escala por par.
+    # Mientras se replica esa metodologia, las filas de forward usan el valor
+    # presente del propio SFC (col 53/54) como proxy (~-27.5% vs macro).
     if vpn_swaps is not None and len(vpn_swaps):
         der = der_rows.inyectar_vpn_swaps(der, vpn_swaps)
         n_val = int(((der["clasificacion"] == "SWAP") & der["vr_mercado"].notna()).sum())

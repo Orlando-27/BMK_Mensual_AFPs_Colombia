@@ -71,6 +71,28 @@ propio de PORVENIR porque reporta una magnitud distinta (causado de cámara).
 175 swaps de PROTECCION reportan ambas columnas en 0 (no reportan valor). Se
 excluyen del cruce.
 
+## 5. Forwards (item abierto)
+
+La hoja Benchmark usa el valor presente del propio SFC (col 53/54) al corte como
+proxy para las filas de FORWARD. Contra el macro esto da **-27.5%** (-2.43 B), que
+es practicamente todo el descuadre del total (-0.449%). El macro revalua con la
+curva de puntos ~10 dias despues.
+
+Se intento inyectar el valor revaluado (motor fwd_valuator) pero:
+  - La hoja 'Fwd Industria' del macro NO es un valorador contrato por contrato,
+    sino una **matriz de posicion neta x sensibilidad de spot** (filas=paridades,
+    columnas=AFP/portafolio, valor='POSICION EN USD'). Reproducirla exige replicar
+    esa metodologia, no sumar el P&G por contrato.
+  - El conversor INFOVALMER de puntos forward tenia un bug de parseo (tomaba
+    bid/ask en vez de plazo/mid) — corregido en `_leer_txt_curva`. Ademas los
+    puntos vienen en unidades por par (pips 1e-4 para EURUSD, etc.) que hay que
+    escalar.
+
+La inyeccion quedo DESHABILITADA (pipeline usa el proxy SFC). Cerrar forwards es
+el proximo item: replicar la matriz de posicion/sensibilidad de la hoja Fwd
+Industria + escalar los puntos por par (`tools/validar_fwd_pares.py` ayuda a
+derivar la escala vs el macro).
+
 ## Herramientas
 
 - `tools/comparar_sfc.py` — mi VPN vs col 53/54 del SFC (set limpio + parciales).
