@@ -147,8 +147,13 @@ def inyectar_vpn_swaps(der: pd.DataFrame, vpn_df: pd.DataFrame) -> pd.DataFrame:
     pata = out.get("pata", pd.Series("", index=out.index)).astype(str)
     nueva = out["vr_mercado"].copy()
     for i in out.index[es_swap]:
-        m = m_der if pata[i] == "DER" else m_obl
-        v = m.get(idc[i])
+        # Pata derecho se recibe (+VPN); pata obligacion se paga (-VPN). Asi las
+        # dos filas netean al MtM del swap (como en el Benchmark del macro).
+        if pata[i] == "DER":
+            v = m_der.get(idc[i])
+        else:
+            vo = m_obl.get(idc[i])
+            v = -vo if vo is not None and pd.notna(vo) else None
         if v is not None and pd.notna(v):
             nueva[i] = v
     out["vr_mercado"] = nueva
