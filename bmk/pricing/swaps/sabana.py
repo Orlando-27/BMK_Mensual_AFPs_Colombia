@@ -43,6 +43,12 @@ from bmk.prepare.normalize import normalizar_afp, _cod_portafolio
 INDICE = {"FS": "Fija", "SOF": "SOFR", "IBR": "IBR", "DTF": "DTF", "IPC": "IPC", "UVR": "UVR"}
 
 # Periodicidad (col 40/44) — decodificada contra la Period. del macro (SWAPIND).
+# El codigo 7 (26 swaps: 24 PORVENIR + 2 PROTECCION) se mapea a "Anual" igual que
+# el macro. Contra el reporte propio del SFC estos 26 quedan descuadrados en
+# direcciones OPUESTAS (PROTECCION +7% alto, PORVENIR -32% bajo), asi que NO es un
+# tema puro de frecuencia: los de PORVENIR parecen capitalizar intereses
+# (cero-cupon/bullet, factor ~1.57x nominal). Pendiente confirmar el codigo 7 con
+# el diccionario/mesa; entre tanto "Anual" reproduce el Benchmark macro.
 PERIODICIDAD = {3: "Trimestral", 5: "Semestral", 6: "Anual", 7: "Anual"}
 # Base de calculo (col 45) — cosmetica (el motor v6 usa DAY_BASE por moneda).
 BASE = {1: "ACT/360", 2: "ACT/365"}
