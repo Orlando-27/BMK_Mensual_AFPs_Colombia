@@ -12,9 +12,13 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 import pandas as pd
+
+# Permite correr el tool directo (python3 tools/correr_swaps.py) sin PYTHONPATH.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from bmk.ingest import sfc, infovalmer
 from bmk.pricing.swaps import sabana
