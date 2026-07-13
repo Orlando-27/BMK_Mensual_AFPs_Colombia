@@ -24,7 +24,16 @@ def _leer_fwd(path: str) -> pd.DataFrame:
     hoja = next((h for h in xl.sheet_names if h.strip().lower() == "fwd industria"), None)
     if hoja is None:
         raise SystemExit(f"No hay hoja 'Fwd Industria' en {path}. Hojas: {xl.sheet_names}")
-    df = pd.read_excel(path, sheet_name=hoja)
+    # El encabezado puede no estar en la fila 0 (el macro lo trae mas abajo).
+    # Se busca la fila que contenga 'PARIDAD'.
+    crudo = pd.read_excel(path, sheet_name=hoja, header=None, nrows=25)
+    hrow = 0
+    for i in range(len(crudo)):
+        vals = [str(x).strip().upper() for x in crudo.iloc[i].tolist()]
+        if any("PARIDAD" in v for v in vals):
+            hrow = i
+            break
+    df = pd.read_excel(path, sheet_name=hoja, header=hrow)
     df.columns = [str(c).strip().upper() for c in df.columns]
 
     def col(*alts):
