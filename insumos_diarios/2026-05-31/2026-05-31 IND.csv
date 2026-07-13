@@ -1,0 +1,89 @@
+AUD;DolarAustraliano/USD;29/05/2026;$;0.717083;US$;Dolar Americano; ;1.000000
+AUDL;Aud en Cop;29/05/2026;$;2637.540251;$;Pesos;01; 
+B01TF;Beta 0 Tes Tasa Fija;29/05/2026;%;11.877239; ; ;01; 
+B02TF;Beta 1 Tes Tasa Fija;29/05/2026;%;-2.881756; ; ;01; 
+B03TF;Beta 2 Tes Tasa Fija;29/05/2026;%;9.268126; ; ;01; 
+B0UVR;Beta 0 UVR;29/05/2026;%;6.247281; ; ;01; 
+B1UVR;Beta 1 UVR;29/05/2026;%;-0.40708; ; ;01; 
+B2UVR;Beta 2 UVR;29/05/2026;%;3.472602; ; ;01; 
+BBGM3;Nota BBVAGLMK COP 07022029 TPX;29/05/2026;%;0; ; ; ;1.000000
+BBGM5;Nota BBVAGL MK BV COP 14052027;29/05/2026;%;0; ; ; ;1.000000
+BBGM6;Nota BBVA GL MK BV COP 1305203;29/05/2026;%;0; ; ; ;1.000000
+BNP10;Nota BNP Paribas BRL 03082027;29/05/2026;%;0; ; ; ;1.000000
+BNP11;Nota BNP Paribas COP 13052030 ;29/05/2026;%;0; ; ; ;1.000000
+BNP6;Nota BNP Paribas 15062027 SPX;29/05/2026;%;0; ; ; ;1.000000
+BNP7;Nota BNP Paribas COP 05022029 ;29/05/2026;%;0; ; ; ;1.000000
+BNP9;Nota BNP Paribas COP 12072027;29/05/2026;%;0; ; ; ;1.000000
+BOUS0;Un Mes;29/05/2026;%;3.61; ; ; ;1.000000
+BOUS1;Tres Meses;29/05/2026;%;3.7009; ; ; ;1.000000
+BOUS2;Seis Meses;29/05/2026;%;3.765907; ; ; ;1.000000
+BOUS3;Un Año;29/05/2026;%;3.875548; ; ; ;1.000000
+BOUS4;Dos Años;29/05/2026;%;4.008695; ; ; ;1.000000
+BOUS5;Tres Años;29/05/2026;%;4.055075; ; ; ;1.000000
+BOUS6;Cinco Años;29/05/2026;%;4.150892; ; ; ;1.000000
+BOUS7;Siete Años;29/05/2026;%;4.283056; ; ; ;1.000000
+BOUS8;Diez Años;29/05/2026;%;4.458882; ; ; ;1.000000
+BOUS9;Veinte Años;29/05/2026;%;5.025097; ; ; ;1.000000
+BRL;RealdeBrazil/USD;29/05/2026;$;5.045259;US$;Dolar Americano; ;1.000000
+BRLL;Brl en Cop;29/05/2026;$;729.030905;$;Pesos;01; 
+CAD;DolarCanadiense/USD;29/05/2026;$;1.380453;US$;Dolar Americano; ;1.000000
+CADL;Cad en Cop;29/05/2026;$;2664.450579;$;Pesos;01; 
+CGMH4;Nota CGMH 08 Jul 2027 SPXFP;29/05/2026;%;0; ; ; ;1.000000
+CGMH5;Nota CGMH 03 Ago 2026 SPXFP;29/05/2026;%;0; ; ; ;1.000000
+CHF;FrancoSuizo/USD;29/05/2026;$;0.782463;US$;Dolar Americano; ;1.000000
+CHFL;Chf en Cop;29/05/2026;$;4700.733026;$;Pesos;01; 
+CLP;PesoChileno/USD;29/05/2026;$;890.64;US$;Dolar Americano; ;1.000000
+CLPL;Clp en Cop;29/05/2026;$;4.129783;$;Pesos;01; 
+COPC;Cad en Cop - CHR;29/05/2026;$;2664.450579;$;Pesos;01; 
+CPIL; ;29/05/2026;$;4022.792655;$;Pesos;01; 
+CTAHA;Cta Ahorro Bancafe;29/05/2026;%;5.6; ; ; ;1.000000
+CTAHB;Cta Ahorro Bogota;29/05/2026;%;10.3; ; ; ;1.000000
+CTAHC;Cta Ahorro Citibank;29/05/2026;%;2.1; ; ; ;1.000000
+CTAHF;Cta Ahorro Daviviend;29/05/2026;%;9.9; ; ; ;1.000000
+CTAHG;Cta Ahorro Bancolomb;29/05/2026;%;3; ; ; ;1.000000
+CTAHH;Cta Ahorro BBVAGanad;29/05/2026;%;10.15; ; ; ;1.000000
+CTAHI;Cta Ahorro Popular;29/05/2026;%;11.5; ; ; ;1.000000
+CTAHN;Cta Ahorro Santander;29/05/2026;%;10.25; ; ; ;1.000000
+CTAHO;Cta Ahorro Occidente;29/05/2026;%;9.15; ; ; ;1.000000
+CTAHP;Cta Ahorro Davibank;29/05/2026;%;10.2; ; ; ;1.000000
+CTAHR;Cta Ahorro Bancoldex;29/05/2026;%;10.15; ; ; ;1.000000
+CTAHS;Cta Ahorro CorpBanca;29/05/2026;%;7.02; ; ; ;1.000000
+CTAHU;Cta Ahorro Sudameris;29/05/2026;%;10.3; ; ; ;1.000000
+CTAHV;Cta Ahorro Caja Social;29/05/2026;%;3.3; ; ; ;1.000000
+EUR;EuroDE;29/05/2026;$;1.1644;US$;Dolar Americano; ;1.000000
+EURD;Derv Dolar/Euro;29/05/2026;$;0.858811;$;Pesos;01; 
+EURL;Eur en Cop;29/05/2026;$;4282.83786;$;Pesos;01; 
+GBP;LibraEsterlina/USD;29/05/2026;$;1.342666;US$;Dolar Americano; ;1.000000
+GBPL;Gbp en Cop;29/05/2026;$;4938.52595;$;Pesos;01; 
+GSI4;Nota GSI BRL 05032031 EEM;29/05/2026;%;0; ; ; ;1.000000
+IBR;IBR Plazo Overnight;29/05/2026;%;10.544; ; ; ;1.000000
+IBR0;IBR 28DiasTit360 Nom;29/05/2026;%;10.623; ; ; ; 
+IBR3M;IBR Plazo 3 Meses;29/05/2026;%;11.26; ; ; ;1.000000
+IBR5;IBR 28DiasTit365 Nom;29/05/2026;%;10.623; ; ;01; 
+IBRA;IBR EA Tit 360;29/05/2026;%;11.1558; ; ; ; 
+IBRB;IBR EA Tit 365;29/05/2026;%;11.1558; ; ;01; 
+JPMC8;Nota JPM Chase B 05022029 SPXF;29/05/2026;%;0; ; ; ;1.000000
+JPMC9;Nota JPM Chase B 15052028 SPXF;29/05/2026;%;0; ; ; ;1.000000
+JPY;Dolar * Yen;29/05/2026;$;159.266575;US$;Dolar Americano; ;1.000000
+MSFL2;Nota MS F LLC BRL 03082027 SPX;29/05/2026;%;0; ; ; ;1.000000
+MXN;PesoMexicano/USD;29/05/2026;$;17.339832;US$;Dolar Americano; ;1.000000
+MXNL;Mxn en Cop;29/05/2026;$;212.121436;$;Pesos;01; 
+NOK;CoronaNoruega/USD;29/05/2026;$;9.252405;US$;Dolar Americano; ;1.000000
+NOKL;Nok en Cop;29/05/2026;$;397.534493;$;Pesos;01; 
+SEK;CoronaSueca/USD;29/05/2026;$;9.251116;US$;Dolar Americano; ;1.000000
+SEKL;Sek en Cop;29/05/2026;$;397.58985;$;Pesos;01; 
+SFOIS; ;29/05/2026;%;3.62; ; ;01; 
+SIPP2;Nota Santander BRL 03082026 SP;29/05/2026;%;0; ; ; ;1.000000
+SOFR;SOFR Overnight;29/05/2026;%;3.62; ; ; ;1.000000
+TAOTF;TAO Tes Tasa Fija;29/05/2026;%;1.327133; ; ;01; 
+TAUVR;TAO 3 UVR;29/05/2026;%;2.647296; ; ;01; 
+TRM;USD Opcion;29/05/2026;$;3678.15;$;Pesos;01; 
+UDI;Unidad de Inversión MXN;29/05/2026;$;8.84062;$;Pesos; ;1.000000
+UDIC;Unidad de Inv. MXN - CAD;29/05/2026;$;1.420824;$;Pesos; ;1.000000
+UDIL;Unidad de Inversión COP;29/05/2026;$;1875.285012;$;Pesos;01; 
+US$;Dolar Americano;29/05/2026;$;3678.15;$;Pesos; ;1.000000
+USN; ;29/05/2026;$;3678.15;$;Pesos;01; 
+UVR;Unid Valor Real;29/05/2026;$;412.0036;$;Pesos; ; 
+UVRC;Unid Valor Real CAD;29/05/2026;$;6.467057;$;Pesos;01; 
+UVRV;Var Unid Valor Real;29/05/2026;%;5.62; ; ; ; 
+YEN;Ind Der Yen Rta Var;29/05/2026;$;23.0943;$;Pesos;01; 
