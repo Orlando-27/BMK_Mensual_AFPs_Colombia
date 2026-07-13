@@ -170,31 +170,41 @@ def inyectar_vpn_swaps(der: pd.DataFrame, vpn_df: pd.DataFrame) -> pd.DataFrame:
 
 def inyectar_valor_forwards(der: pd.DataFrame, fwd_val: pd.DataFrame) -> pd.DataFrame:
     """Reemplaza el valor de mercado de las filas de FORWARD (que por defecto usan
-    el valor presente del propio SFC, col 53/54, al corte) por el valor revaluado
+    el valor presente del propio SFC, col 53/54, al corte) por el MtM revaluado
     con la curva de puntos forward (motor fwd_valuator, como la hoja Fwd Industria
-    del macro). Se netea por (afp, portafolio, divisa) igual que _forwards.
+    del macro).
 
-    fwd_val: salida de bmk.pricing.fwd_valuator.valorar (columnas afp, portafolio,
-    mder, mobl, valor_cop_der, valor_cop_obli). Solo se sobrescriben las divisas
-    cubiertas por el valorador (pares en PARES); el resto conserva el proxy SFC."""
+    El valor de mercado de un forward es su P&G/MtM (pyg = valor a mercado - valor
+    pactado). Se atribuye a la divisa del par (campo 'moneda', la no-USD): p.ej. el
+    MtM de un USDCOP va a la fila FWCOP, el de un USDBRL a FWBRL. Las filas de la
+    divisa contraria del par (FWUSD) quedan en 0 para no duplicar; la suma por
+    (afp, portafolio) reproduce el MtM total revaluado. Las divisas sin curva de
+    puntos (PEN/NOK/KRW) conservan el proxy SFC.
+
+    fwd_val: salida de bmk.pricing.fwd_valuator.valorar (afp, portafolio, moneda,
+    contra, pyg)."""
     if der is None or der.empty or fwd_val is None or fwd_val.empty:
         return der
     fv = fwd_val.copy()
-    fv["mder"] = _norm_cur(fv["mder"])
-    fv["mobl"] = _norm_cur(fv["mobl"])
-    der_sum = fv.groupby(["afp", "portafolio", "mder"])["valor_cop_der"].sum()
-    obl_sum = fv.groupby(["afp", "portafolio", "mobl"])["valor_cop_obli"].sum()
-    cubiertas = set(fv["mder"].dropna()) | set(fv["mobl"].dropna())
+    fv = fv[pd.to_numeric(fv["pyg"], errors="coerce").notna()]
+    if fv.empty:
+        return der
+    fv["moneda"] = _norm_cur(fv["moneda"])
+    fv["contra"] = _norm_cur(fv["contra"])
+    pyg_sum = fv.groupby(["afp", "portafolio", "moneda"])["pyg"].sum()
+    # Divisas que el valorador cubre (par completo): se sobrescriben; el resto
+    # (PEN/NOK/KRW) conserva el proxy SFC.
+    cubiertas = set(fv["moneda"].dropna()) | set(fv["contra"].dropna())
     out = der.copy()
     es_fwd = out["clasificacion"].astype(str).str.upper() == "FORWARD"
     nueva = out["vr_mercado"].copy()
     for i in out.index[es_fwd]:
         cur = out.at[i, "moneda"]
         if cur not in cubiertas:
-            continue  # divisa sin curva de puntos -> se deja el proxy SFC
+            continue  # divisa sin curva de puntos -> proxy SFC
         afp, port = out.at[i, "afp"], out.at[i, "cod_portafolio"]
-        v = float(der_sum.get((afp, port, cur), 0.0)) - float(obl_sum.get((afp, port, cur), 0.0))
-        nueva[i] = v
+        # La divisa contraria (USD) no es clave en pyg_sum -> queda en 0.
+        nueva[i] = float(pyg_sum.get((afp, port, cur), 0.0))
     out["vr_mercado"] = nueva
     return out
 
