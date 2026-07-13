@@ -64,6 +64,9 @@ def _base_415(f415: pd.DataFrame) -> pd.DataFrame:
         "nobl": pd.to_numeric(_col(f415, "nominal_obligacion"), errors="coerce"),
         "vp_der": pd.to_numeric(f415.iloc[:, 53], errors="coerce"),
         "vp_obl": pd.to_numeric(f415.iloc[:, 54], errors="coerce"),
+        # Indice de la tasa facial por pata (FS = fija -> "SWAP TF", si no "SWAP TV").
+        "ider": f415.iloc[:, 37].astype(str).str.upper().str.strip(),
+        "iobl": f415.iloc[:, 41].astype(str).str.upper().str.strip(),
     })
     return out[out["tipo"].notna()].reset_index(drop=True)
 
@@ -123,12 +126,17 @@ def _swaps(base: pd.DataFrame, solo_industria: bool) -> pd.DataFrame:
     filas = []
     for i, r in sw.iterrows():
         cs = clas.iloc[i]
-        # Pata derecho (SWAP TF) y pata obligacion (SWAP TV). VPN pendiente de
-        # valoracion (motor v6 con curvas del corte) -> vr_mercado NaN.
-        filas.append(_fila(r["afp"], r["port"], cs, "SWAP", "SWAP TF",
+        # Rotulo por pata: "SWAP TF" si la tasa de esa pata es fija (indice FS),
+        # "SWAP TV" si es flotante. Como en el Benchmark de las macros, la pata fija
+        # puede ser el derecho O la obligacion (p.ej. CCS fija-fija => ambas TF;
+        # IRS => una TF y otra TV). El signo lo da recibir(+)/pagar(-), no el rotulo.
+        nemo_der = "SWAP TF" if str(r["ider"]).strip() == "FS" else "SWAP TV"
+        nemo_obl = "SWAP TF" if str(r["iobl"]).strip() == "FS" else "SWAP TV"
+        # VPN pendiente de valoracion (motor v6 con curvas del corte) -> vr_mercado NaN.
+        filas.append(_fila(r["afp"], r["port"], cs, "SWAP", nemo_der,
                            float("nan"), nominal=r["nder"], moneda=r["mder"],
                            id_contrato=r["id_contrato"], pata="DER"))
-        filas.append(_fila(r["afp"], r["port"], cs, "SWAP", "SWAP TV",
+        filas.append(_fila(r["afp"], r["port"], cs, "SWAP", nemo_obl,
                            float("nan"), nominal=r["nobl"], moneda=r["mobl"],
                            id_contrato=r["id_contrato"], pata="OBL"))
     return pd.DataFrame(filas)
