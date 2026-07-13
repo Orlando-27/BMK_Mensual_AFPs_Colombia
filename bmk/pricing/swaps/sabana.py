@@ -126,15 +126,16 @@ def a_swapind(sab: pd.DataFrame) -> pd.DataFrame:
         return sab[campo] if campo in sab.columns else ""
     facial_der = pd.to_numeric(sab["der_tasa_facial"], errors="coerce") / 100.0
     facial_obl = pd.to_numeric(sab["obl_tasa_facial"], errors="coerce") / 100.0
+    # Nombres EXACTOS (con espacios) que lee el motor v6 desde SWAPIND.
     out = pd.DataFrame({
         "TIPO SWAP": col("tipo_swap"), "ISIN": col("id_contrato"), "EMISOR": col("afp"),
-        "F.Compra": col("f_compra"), "Emision": col("f_compra"), "F.Vcto": col("f_vcto"),
+        "F.Compra": col("f_compra"), "Emision ": col("f_compra"), "F.Vcto  ": col("f_vcto"),
         "IND CLASE": sab["der_indice_cod"].map(_clase), "IND. Tfacial": col("der_indice_cod"),
         "Facial": facial_der, "Period.": col("der_periodicidad"),
         "Mo": sab["der_periodicidad"].map(_MO), "Vr Nominal DER": col("der_nominal"),
         "Moneda": col("der_moneda"), "VPN Derecho ME": "",
         "IND CLASE.1": sab["obl_indice_cod"].map(_clase), "IND. Tfacial.1": col("obl_indice_cod"),
-        "Facial.1": facial_obl, "Period..1": col("obl_periodicidad"),
+        "Facial         ": facial_obl, "Period..1": col("obl_periodicidad"),
         "Mo.1": sab["obl_periodicidad"].map(_MO), "Vr Nominal": col("obl_nominal"),
         "Moneda.1": col("obl_moneda"), "VPN Obligacion ME": "",
         "Utilidad/Perdida": "", "POR": col("portafolio"), "IBR o/n": "",
