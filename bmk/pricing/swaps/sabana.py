@@ -120,10 +120,17 @@ def _clase(indice_cod: str) -> str:
 
 
 def _fecha_str(serie) -> pd.Series:
-    """AAAAMMDD (float del SFC) -> texto 'AAAAMMDD' para que el motor lo parsee
-    como fecha (pd.to_datetime('20211021') = 2021-10-21; un float da 1970)."""
+    """AAAAMMDD (del SFC) -> texto ISO 'AAAA-MM-DD'. Con guiones pandas NO lo
+    re-infiere como entero al leer el CSV (que rompia el parseo de fecha del
+    motor: un entero 20211021 da 1970, el ISO da 2021-10-21)."""
     n = pd.to_numeric(serie, errors="coerce")
-    return n.map(lambda x: f"{int(x):08d}" if pd.notna(x) else "")
+
+    def _fmt(x):
+        if pd.isna(x):
+            return ""
+        v = int(x)
+        return f"{v // 10000:04d}-{(v // 100) % 100:02d}-{v % 100:02d}"
+    return n.map(_fmt)
 
 
 def a_swapind(sab: pd.DataFrame) -> pd.DataFrame:
