@@ -119,17 +119,26 @@ def _clase(indice_cod: str) -> str:
     return "SWAP TF" if str(indice_cod).upper().strip() == "FS" else "SWAP TV"
 
 
+def _fecha_str(serie) -> pd.Series:
+    """AAAAMMDD (float del SFC) -> texto 'AAAAMMDD' para que el motor lo parsee
+    como fecha (pd.to_datetime('20211021') = 2021-10-21; un float da 1970)."""
+    n = pd.to_numeric(serie, errors="coerce")
+    return n.map(lambda x: f"{int(x):08d}" if pd.notna(x) else "")
+
+
 def a_swapind(sab: pd.DataFrame) -> pd.DataFrame:
     """Mapea la sabana al layout exacto de la hoja SWAPIND (Calculadora Swap).
     Las columnas de VPN/Utilidad quedan vacias (las llena el motor v6)."""
     def col(campo):
         return sab[campo] if campo in sab.columns else ""
+    f_compra = _fecha_str(sab["f_compra"])
+    f_vcto = _fecha_str(sab["f_vcto"])
     facial_der = pd.to_numeric(sab["der_tasa_facial"], errors="coerce") / 100.0
     facial_obl = pd.to_numeric(sab["obl_tasa_facial"], errors="coerce") / 100.0
     # Nombres EXACTOS (con espacios) que lee el motor v6 desde SWAPIND.
     out = pd.DataFrame({
         "TIPO SWAP": col("tipo_swap"), "ISIN": col("id_contrato"), "EMISOR": col("afp"),
-        "F.Compra": col("f_compra"), "Emision ": col("f_compra"), "F.Vcto  ": col("f_vcto"),
+        "F.Compra": f_compra, "Emision ": f_compra, "F.Vcto  ": f_vcto,
         "IND CLASE": sab["der_indice_cod"].map(_clase), "IND. Tfacial": col("der_indice_cod"),
         "Facial": facial_der, "Period.": col("der_periodicidad"),
         "Mo": sab["der_periodicidad"].map(_MO), "Vr Nominal DER": col("der_nominal"),
