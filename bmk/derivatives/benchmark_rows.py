@@ -55,6 +55,7 @@ def _base_415(f415: pd.DataFrame) -> pd.DataFrame:
     tipo = pd.to_numeric(_col(f415, "tipo_derivado"), errors="coerce")
     out = pd.DataFrame({
         "tipo": tipo,
+        "id_contrato": _col(f415, "numero_contrato").astype(str),
         "afp": _col(f415, "entidad").map(normalizar_afp),
         "port": _col(f415, "nombre").map(_cod_portafolio),
         "mder": _norm_cur(_col(f415, "moneda_derecho")),
@@ -75,7 +76,8 @@ def _combos(base: pd.DataFrame, solo_industria: bool) -> list[tuple[str, str]]:
     return sorted(map(tuple, combos.to_numpy()))
 
 
-def _fila(afp, port, clas, clase, nemo, vr_mercado, nominal=0.0, moneda="") -> dict:
+def _fila(afp, port, clas, clase, nemo, vr_mercado, nominal=0.0, moneda="",
+          id_contrato="", pata="") -> dict:
     return {
         "cod_portafolio": port, "afp": afp, "nemo": nemo, "isin": "",
         "clas_sfc": clas, "emisor": clas, "f_compra": "", "f_vcto": "",
@@ -84,6 +86,7 @@ def _fila(afp, port, clas, clase, nemo, vr_mercado, nominal=0.0, moneda="") -> d
         "vr_mercado": vr_mercado, "clase_inversion": clase,
         "ubicacion": "INTERNACIONAL", "clasificacion": clase,
         "riesgo": "No Reporta", "is_clasificado": True, "fuente_clasif": "derivado",
+        "id_contrato": str(id_contrato), "pata": pata,
     }
 
 
@@ -123,10 +126,33 @@ def _swaps(base: pd.DataFrame, solo_industria: bool) -> pd.DataFrame:
         # Pata derecho (SWAP TF) y pata obligacion (SWAP TV). VPN pendiente de
         # valoracion (motor v6 con curvas del corte) -> vr_mercado NaN.
         filas.append(_fila(r["afp"], r["port"], cs, "SWAP", "SWAP TF",
-                           float("nan"), nominal=r["nder"], moneda=r["mder"]))
+                           float("nan"), nominal=r["nder"], moneda=r["mder"],
+                           id_contrato=r["id_contrato"], pata="DER"))
         filas.append(_fila(r["afp"], r["port"], cs, "SWAP", "SWAP TV",
-                           float("nan"), nominal=r["nobl"], moneda=r["mobl"]))
+                           float("nan"), nominal=r["nobl"], moneda=r["mobl"],
+                           id_contrato=r["id_contrato"], pata="OBL"))
     return pd.DataFrame(filas)
+
+
+def inyectar_vpn_swaps(der: pd.DataFrame, vpn_df: pd.DataFrame) -> pd.DataFrame:
+    """Llena vr_mercado de las filas de swap con el VPN del motor v6.
+    vpn_df: columnas ISIN, VPN_Derecho_Calc, VPN_Oblig_Calc (por contrato)."""
+    if der is None or der.empty or vpn_df is None or vpn_df.empty:
+        return der
+    m_der = dict(zip(vpn_df["ISIN"].astype(str), pd.to_numeric(vpn_df["VPN_Derecho_Calc"], errors="coerce")))
+    m_obl = dict(zip(vpn_df["ISIN"].astype(str), pd.to_numeric(vpn_df["VPN_Oblig_Calc"], errors="coerce")))
+    out = der.copy()
+    es_swap = out["clasificacion"].astype(str).str.upper() == "SWAP"
+    idc = out.get("id_contrato", pd.Series("", index=out.index)).astype(str)
+    pata = out.get("pata", pd.Series("", index=out.index)).astype(str)
+    nueva = out["vr_mercado"].copy()
+    for i in out.index[es_swap]:
+        m = m_der if pata[i] == "DER" else m_obl
+        v = m.get(idc[i])
+        if v is not None and pd.notna(v):
+            nueva[i] = v
+    out["vr_mercado"] = nueva
+    return out
 
 
 def generar(formato_415: pd.DataFrame, solo_industria: bool = True) -> pd.DataFrame:

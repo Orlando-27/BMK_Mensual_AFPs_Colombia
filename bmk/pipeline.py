@@ -38,7 +38,7 @@ def _insumo(nombre: str) -> Path:
     return p if p.exists() else Path("insumos_demo") / nombre
 
 
-def correr(cfg: Config, archivo: str | None = None) -> dict:
+def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None) -> dict:
     reg = RegistroAlertas(corte=cfg.corte)
     log: list[str] = []
 
@@ -125,6 +125,10 @@ def correr(cfg: Config, archivo: str | None = None) -> dict:
 
     # Filas de derivados (forwards/opciones/swaps) para la hoja Benchmark.
     der = der_rows.generar(arch.formato_415)
+    if vpn_swaps is not None and len(vpn_swaps):
+        der = der_rows.inyectar_vpn_swaps(der, vpn_swaps)
+        n_val = int(((der["clasificacion"] == "SWAP") & der["vr_mercado"].notna()).sum())
+        paso(f"Swaps valorados (VPN v6) inyectados: {n_val} patas")
     paso(f"Derivados hoja: {len(der)} filas ({(der['clasificacion']=='FORWARD').sum()} fwd, "
          f"{(der['clasificacion']=='OPCIONES').sum()} opt, {(der['clasificacion']=='SWAP').sum()} swap)")
 
