@@ -180,4 +180,29 @@ def clasificar(activos: pd.DataFrame, ref_dir: str | Path = "bmk/config/referenc
     falta_ubic = out["is_clasificado"] & (out["ubicacion"].isin(["", "ND"]))
     out.loc[falta_ubic, "ubicacion"] = out.loc[falta_ubic, "clase_inversion"].map(
         ubic_map).fillna(out.loc[falta_ubic, "ubicacion"])
+
+    # Ultimo recurso: clas_sfc de renta fija (bonos, tesoros, CDs...) cuyas
+    # clase_inversion mapean TODAS a R FIJA. Aunque la clase_inversion sea ambigua
+    # (EM CORPORATIVOS vs CORPORATIVO LOCAL, etc.), la CLASIFICACION (R FIJA) no lo
+    # es. Evita que instrumentos nuevos de renta fija queden en ND. La ubicacion se
+    # deriva de la moneda (COP/UVR = NACIONAL; el resto INTERNACIONAL).
+    ldf = pd.read_csv(Path(ref_dir) / "clas_sfc_legend.csv", dtype=str).fillna("")
+    lm: dict[str, set] = {}
+    for _, r in ldf.iterrows():
+        lm.setdefault(str(r["clas_sfc"]).strip().upper(), set()).add(str(r["clase_inversion"]).strip())
+    rf_codes = {c for c, cls in lm.items() if cls and all(clasif_map.get(ci) == "R FIJA" for ci in cls)}
+    nd = ~out["is_clasificado"] | out["clasificacion"].astype(str).isin(["", "ND"])
+    es_rf = nd & out["clas_sfc"].astype(str).str.upper().str.strip().isin(rf_codes)
+    if es_rf.any():
+        out.loc[es_rf, "clasificacion"] = "R FIJA"
+        out.loc[es_rf, "is_clasificado"] = True
+        out.loc[es_rf, "fuente_clasif"] = "clas_sfc_rf"
+        if "clase" in out.columns:
+            out.loc[es_rf, "clase"] = "R FIJA"
+        if "moneda" in out.columns:
+            mon = out.loc[es_rf, "moneda"].astype(str).str.upper().str.strip()
+            out.loc[es_rf, "ubicacion"] = mon.map(
+                lambda m: "NACIONAL" if m in ("COP", "COU", "UVR") else "INTERNACIONAL")
+        sin_riesgo = es_rf & out["riesgo"].astype(str).isin(["", "ND"])
+        out.loc[sin_riesgo, "riesgo"] = "No Reporta"
     return out
