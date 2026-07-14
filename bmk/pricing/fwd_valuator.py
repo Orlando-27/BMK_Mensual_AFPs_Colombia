@@ -47,14 +47,16 @@ import pandas as pd
 # hoja 'Fwd Industria' del corte 2026-05-31: los cruces tienen puntos_macro ~0.
 PARES = {
     "USDCOP": ("COP", "FWPCOP"),
+    # Solo BRL/MXN llevan puntos: son los cruces con premio forward grande (rate
+    # diff alto) y contratos deep-OTM; sus puntos INFOVALMER estan bien escalados.
     "USDBRL": ("XUSD", "FWPBRL"),
     "USDMXN": ("XUSD", "FWPMXN"),
-    "USDJPY": ("XUSD", "FWPJPY"),
-    "USDCLP": ("XUSD", "FWPCLP"),
-    "USDCAD": ("XUSD", "FWPCAD"),
-    "USDCHF": ("XUSD", "FWPCHF"),
-    # EUR/AUD/GBP sin puntos: FWPEUR viene en pips (mal escalado) y el premio
-    # forward de estos cruces es pequeno; spot x DF_USD aproxima el valor del macro.
+    # El resto sin puntos: con descuento USD (spot x DF_USD) ya reproducen el macro
+    # (CAD/JPY/CLP casi exactos); sus puntos INFOVALMER vienen mal escalados (pips).
+    "USDJPY": ("XUSD", None),
+    "USDCLP": ("XUSD", None),
+    "USDCAD": ("XUSD", None),
+    "USDCHF": ("XUSD", None),
     "EURUSD": ("USDX", None),
     "AUDUSD": ("USDX", None),
     "GBPUSD": ("USDX", None),
@@ -147,11 +149,11 @@ def valorar(fwd: pd.DataFrame, curvas: Curvas, fecha_valoracion: int) -> pd.Data
             tasa_vpn = K * df_cop        # pata strike, descuento COP
             tasa_fwd = spot * df_usd     # pata spot, descuento USD
         else:
-            # Cruces (USDX/XUSD): descuento USD (LIBBTS) en ambas patas y premio
-            # forward via los puntos INFOVALMER de la moneda. Verificado contra la
-            # hoja Fwd Industria: tvpn = strike x DF_USD, tfwd = (spot+puntos) x DF_USD;
-            # VALOR DER = nom*TRM/tfwd, VALOR OBLI = nom*TRM/tvpn (o al reves segun
-            # posicion). El DF~1 anterior solo servia para plazos cortos.
+            # Cruces (USDX/XUSD): descuento USD (LIBBTS) en ambas patas. tvpn =
+            # strike x DF_USD; tfwd = (spot + puntos) x DF_USD. Solo BRL/MXN traen
+            # puntos (premio forward grande + contratos deep-OTM); el resto usa
+            # tfwd = spot x DF_USD (sus puntos INFOVALMER vienen en pips mal
+            # escalados y su premio es pequeno).
             pts = curvas.interp(curva_pts, t) if curva_pts else 0.0
             tasa_vpn = K * df_usd
             tasa_fwd = (spot + pts) * df_usd
