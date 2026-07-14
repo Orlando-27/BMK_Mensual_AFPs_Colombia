@@ -93,19 +93,25 @@ La inyeccion del MtM revaluado en la hoja Benchmark quedo REACTIVADA.
 Tambien se corrigio un bug de parseo en `_leer_txt_curva` (los Fwd_<par> traen 4
 columnas plazo/mid/bid/ask y tomaba bid/ask).
 
-**Validacion** (contra Benchmark junio con las curvas REALES del 8-jun): USDCOP
-paso de -33% a -1.6%; AUDUSD/GBPUSD/USDCAD/USDCLP/USDJPY exactos; **TOTAL del
-benchmark = +0.174%, todas las AFP dentro de 0.4%** (PORVENIR +0.1%, PROTECCION
-+0.4%, SKANDIA 0.0%). `tools/validar_fwd_pares.py` compara mi Fwd Industria vs
-la del macro.
+Los CRUCES tambien se descuentan (DF_USD, LIBBTS) en las dos patas:
+  - `Tasa VPN = strike x DF_USD`, `Tasa Forward = (spot + puntos) x DF_USD`.
+  - Puntos solo en BRL/MXN (premio forward grande por rate-diff alto + contratos
+    deep-OTM; sus puntos INFOVALMER estan bien escalados). El resto sin puntos
+    (spot x DF_USD): CAD/JPY/CLP casi exactos; los puntos de EUR/CAD/JPY vienen
+    en pips (mal escalados) y su premio es pequeno.
 
-**Residual menor (FORWARD +9.7%):** un punado de forwards de cruce (BRL/MXN/EUR)
-muy fuera de dinero (p.ej. USDBRL strike 7.25 con spot 5.16 — strike real,
-coincide con nominal_BRL/nominal_USD). En esos el macro asigna el signo/direccion
-del P&G segun que moneda se compra, y la convencion COMPRA/VENTA de los cruces en
-`fwd_valuator` no lo reproduce contrato a contrato. Netean cerca de cero, asi que
-no mueven el total ni las AFP (todas <0.4%). Pendiente: afinar la convencion de
-posicion de los cruces (derivar largo/corto por moneda desde el Formato_415).
+**Validacion final** (contra Benchmark junio con las curvas REALES del 8-jun):
+
+| Clasificacion | dif vs macro |
+|---|---|
+| CAJA, R VARIABLE, NOTAS, OPCIONES | 0.0% |
+| R FIJA | -0.1% |
+| FORWARD | +0.8% (de -27.5%) |
+| **TOTAL** | **+0.026%** |
+| PORVENIR / PROTECCION / SKANDIA | 0.0% / 0.0% / 0.0% |
+
+El benchmark reproduce el macro a **+0.026%**, todas las AFP en 0.0%.
+`tools/validar_fwd_pares.py` compara mi Fwd Industria vs la del macro por par.
 
 ## Herramientas
 
