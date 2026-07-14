@@ -49,13 +49,15 @@ PARES = {
     "USDCOP": ("COP", "FWPCOP"),
     "USDBRL": ("XUSD", "FWPBRL"),
     "USDMXN": ("XUSD", "FWPMXN"),
+    "USDJPY": ("XUSD", "FWPJPY"),
+    "USDCLP": ("XUSD", "FWPCLP"),
+    "USDCAD": ("XUSD", "FWPCAD"),
+    "USDCHF": ("XUSD", "FWPCHF"),
+    # EUR/AUD/GBP sin puntos: FWPEUR viene en pips (mal escalado) y el premio
+    # forward de estos cruces es pequeno; spot x DF_USD aproxima el valor del macro.
     "EURUSD": ("USDX", None),
     "AUDUSD": ("USDX", None),
     "GBPUSD": ("USDX", None),
-    "USDJPY": ("XUSD", None),
-    "USDCLP": ("XUSD", None),
-    "USDCAD": ("XUSD", None),
-    "USDCHF": ("XUSD", None),
 }
 # par -> moneda extranjera cuyo spot (de paridades.csv) usar como spot del par.
 SPOT_MONEDA = {"USDCOP": "USD", "EURUSD": "EUR", "AUDUSD": "AUD", "GBPUSD": "GBP",
@@ -145,11 +147,14 @@ def valorar(fwd: pd.DataFrame, curvas: Curvas, fecha_valoracion: int) -> pd.Data
             tasa_vpn = K * df_cop        # pata strike, descuento COP
             tasa_fwd = spot * df_usd     # pata spot, descuento USD
         else:
-            # Cruces (USDX/XUSD): el macro NO descuenta ni aplica puntos (DF~1),
-            # asi que Tasa VPN = strike y Tasa Forward = spot. Verificado contra la
-            # hoja Fwd Industria (p.ej. USDBRL: P&G = nom*trm*(1/spot - 1/strike)).
-            tasa_vpn = K
-            tasa_fwd = spot
+            # Cruces (USDX/XUSD): descuento USD (LIBBTS) en ambas patas y premio
+            # forward via los puntos INFOVALMER de la moneda. Verificado contra la
+            # hoja Fwd Industria: tvpn = strike x DF_USD, tfwd = (spot+puntos) x DF_USD;
+            # VALOR DER = nom*TRM/tfwd, VALOR OBLI = nom*TRM/tvpn (o al reves segun
+            # posicion). El DF~1 anterior solo servia para plazos cortos.
+            pts = curvas.interp(curva_pts, t) if curva_pts else 0.0
+            tasa_vpn = K * df_usd
+            tasa_fwd = (spot + pts) * df_usd
         v_pact = _valor_pata(tipo, nom, tasa_vpn, curvas.trm)
         v_mkt = _valor_pata(tipo, nom, tasa_fwd, curvas.trm)
         op = str(r["operacion"]).strip().upper()
