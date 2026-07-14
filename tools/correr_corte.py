@@ -48,6 +48,17 @@ def main() -> int:
     print("=== 2. Valoracion de swaps (motor v6) ===")
     res = correr_swaps.correr(a.curvas, a.corte, a.sfc, f"salidas/swaps/{a.corte}")
     vpn = res[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]] if "ISIN" in res.columns else None
+    # Output swap-por-swap (VPN, precio, duracion, convexidad, MtM) para el corte.
+    try:
+        from bmk.ingest import sfc as _sfc
+        from bmk.pricing.swaps import sabana as _sab
+        from bmk.output import valoracion_swaps as _vsw
+        _cfg0 = Config(anio=a.anio, mes=a.mes)
+        _sabana = _sab.construir(_sfc.leer(a.sfc).formato_415)
+        _ruta = _vsw.escribir(res, _sabana, _cfg0.dir_corte(), a.corte)
+        print(f"    valoracion swap-por-swap -> {_ruta}")
+    except Exception as e:  # noqa: BLE001
+        print(f"    (aviso) no se pudo escribir la valoracion detallada de swaps: {str(e)[:120]}")
 
     print("=== 3. Pipeline completo (VPN swaps + forwards revaluados) ===")
     cfg = Config(anio=a.anio, mes=a.mes)

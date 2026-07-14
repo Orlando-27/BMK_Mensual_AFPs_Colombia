@@ -265,8 +265,16 @@ def generar(clas: pd.DataFrame, out_dir: str | Path, corte: str,
     wm = wb.add_worksheet("AFP x Portafolio")
     wm.set_column("A:A", 20); wm.set_column("B:I", 15)
     wm.write("A1", "Matriz Valor de Mercado: AFP x Portafolio (millones COP)", F["title"])
-    cols = ["AFP"] + [f"{p} ({PORT_NOMBRE[p]})" for p in PORTAFOLIOS] + ["TOTAL AFP", "Check"]
+    np_ = len(PORTAFOLIOS)
+    # Se agrega la columna "Otros/ND" (portafolios fuera de los 5 obligatorios,
+    # p.ej. voluntarias de SKANDIA) para que el total reconcilie con el SUMIF por
+    # AFP y el check quede en OK mostrando ese valor de forma transparente.
+    cols = (["AFP"] + [f"{p} ({PORT_NOMBRE[p]})" for p in PORTAFOLIOS]
+            + ["Otros/ND", "TOTAL AFP", "Check"])
     wm.write_row(3, 0, cols, F["hdr"])
+    c_otros, c_total, c_check = 1 + np_, 2 + np_, 3 + np_   # indices de columna
+    cini, cfin = "B", chr(ord("A") + np_)                    # B..F (los 5)
+    col_otros, col_total = chr(ord("A") + c_otros), chr(ord("A") + c_total)  # G, H
     row = 4
     first = row
     for afp in afps:
@@ -274,24 +282,24 @@ def generar(clas: pd.DataFrame, out_dir: str | Path, corte: str,
         for k, p in enumerate(PORTAFOLIOS):
             wm.write_formula(row, 1 + k,
                 f'=SUMIFS({rng("I")},{rng("B")},$A{row+1},{rng("A")},"{p}")', F["mill"])
-        cini, cfin = chr(ord("B")), chr(ord("A") + len(PORTAFOLIOS))
-        wm.write_formula(row, 1 + len(PORTAFOLIOS), f"=SUM({cini}{row+1}:{cfin}{row+1})", F["millb"])
-        # Check: total fila = SUMIF por AFP directo
-        tcol = chr(ord("A") + 1 + len(PORTAFOLIOS))
-        wm.write_formula(row, 2 + len(PORTAFOLIOS),
-            f'=IF(ABS({tcol}{row+1}-SUMIF({rng("B")},$A{row+1},{rng("I")}))<=1,"OK","REVISAR")')
+        # Otros/ND = SUMIF total por AFP - suma de los 5 obligatorios.
+        wm.write_formula(row, c_otros,
+            f'=SUMIF({rng("B")},$A{row+1},{rng("I")})-SUM({cini}{row+1}:{cfin}{row+1})', F["mill"])
+        wm.write_formula(row, c_total, f"=SUM({cini}{row+1}:{col_otros}{row+1})", F["millb"])
+        # Check: total fila (5 + Otros) = SUMIF por AFP directo -> siempre reconcilia.
+        wm.write_formula(row, c_check,
+            f'=IF(ABS({col_total}{row+1}-SUMIF({rng("B")},$A{row+1},{rng("I")}))<=1,"OK","REVISAR")')
         row += 1
     # Fila TOTAL
     wm.write(row, 0, "TOTAL", F["txtb"])
-    for k in range(len(PORTAFOLIOS) + 1):
+    for k in range(np_ + 2):   # 5 portafolios + Otros + TOTAL AFP
         c = chr(ord("B") + k)
         wm.write_formula(row, 1 + k, f"=SUM({c}{first+1}:{c}{row})", F["millb"])
-    tcol = chr(ord("A") + 1 + len(PORTAFOLIOS))
-    wm.write_formula(row, 2 + len(PORTAFOLIOS),
-        f'=IF(ABS({tcol}{row+1}-{total_afp_cell})<=1,"OK","REVISAR")')
-    wm.conditional_format(first, 2 + len(PORTAFOLIOS), row, 2 + len(PORTAFOLIOS),
+    wm.write_formula(row, c_check,
+        f'=IF(ABS({col_total}{row+1}-{total_afp_cell})<=1,"OK","REVISAR")')
+    wm.conditional_format(first, c_check, row, c_check,
         {"type": "cell", "criteria": "==", "value": '"OK"', "format": F["ok"]})
-    wm.conditional_format(first, 2 + len(PORTAFOLIOS), row, 2 + len(PORTAFOLIOS),
+    wm.conditional_format(first, c_check, row, c_check,
         {"type": "cell", "criteria": "==", "value": '"REVISAR"', "format": F["bad"]})
 
     # ================= Hoja AFP x Clasificacion =================
@@ -361,7 +369,7 @@ def generar(clas: pd.DataFrame, out_dir: str | Path, corte: str,
         esp = round(float(df.loc[df["afp"] == afp, "vr_mercado"].sum()), 0)
         control(f"Valor mercado {afp}", esp, f'=SUMIF({rng("B")},"{afp}",{rng("I")})')
     control("Suma AFP = Total (matriz)", round(total_mkt, 0),
-            f"='AFP x Portafolio'!{chr(ord('A')+1+len(PORTAFOLIOS))}{4+len(afps)+1}")
+            f"='AFP x Portafolio'!{chr(ord('A')+2+len(PORTAFOLIOS))}{4+len(afps)+1}")
 
     seccion("3. Cuadre de valor por clasificacion (triangulacion)")
     for cl in CLASIF_BUCKETS:

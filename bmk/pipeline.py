@@ -212,7 +212,7 @@ def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None,
     from bmk.consolidate import derivados as der_control
     tabla_deriv = der_control.construir(fwd_val=fwd_val, trm_val=trm_val,
                                         fut_local=local_fut, fut_int=intl_fut,
-                                        swaps_sabana=swap_sab)
+                                        swaps_sabana=swap_sab, vpn_swaps=vpn_swaps)
 
     # Archivo de controles formulado (verificacion trazable en Excel), con derivados.
     ruta_ctrl = controles.generar(clas, cfg.dir_corte(), cfg.corte, derivados=tabla_deriv)
