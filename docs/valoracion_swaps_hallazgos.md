@@ -93,12 +93,19 @@ La inyeccion del MtM revaluado en la hoja Benchmark quedo REACTIVADA.
 Tambien se corrigio un bug de parseo en `_leer_txt_curva` (los Fwd_<par> traen 4
 columnas plazo/mid/bid/ask y tomaba bid/ask).
 
-**Validacion** (contra Benchmark junio, curvas del 8-jun): USDCOP paso de -33% a
--1.6%; AUDUSD/GBPUSD/USDCAD/USDCLP/USDJPY exactos; FORWARD -27.5% -> ~+8% y TOTAL
--0.449% -> +0.13%. El residual (~8% en FORWARD, dominado por EUR/BRL/MXN que
-netean cerca de cero y son hipersensibles al spot) es por la reconstruccion
-APROXIMADA de curvas/spots del test; con el Matriz_TC + SwapCC reales del 8-jun
-cierra. `tools/validar_fwd_pares.py` compara mi Fwd Industria vs la del macro.
+**Validacion** (contra Benchmark junio con las curvas REALES del 8-jun): USDCOP
+paso de -33% a -1.6%; AUDUSD/GBPUSD/USDCAD/USDCLP/USDJPY exactos; **TOTAL del
+benchmark = +0.174%, todas las AFP dentro de 0.4%** (PORVENIR +0.1%, PROTECCION
++0.4%, SKANDIA 0.0%). `tools/validar_fwd_pares.py` compara mi Fwd Industria vs
+la del macro.
+
+**Residual menor (FORWARD +9.7%):** un punado de forwards de cruce (BRL/MXN/EUR)
+muy fuera de dinero (p.ej. USDBRL strike 7.25 con spot 5.16 — strike real,
+coincide con nominal_BRL/nominal_USD). En esos el macro asigna el signo/direccion
+del P&G segun que moneda se compra, y la convencion COMPRA/VENTA de los cruces en
+`fwd_valuator` no lo reproduce contrato a contrato. Netean cerca de cero, asi que
+no mueven el total ni las AFP (todas <0.4%). Pendiente: afinar la convencion de
+posicion de los cruces (derivar largo/corto por moneda desde el Formato_415).
 
 ## Herramientas
 
