@@ -1,0 +1,79 @@
+AUD;DolarAustraliano/USD;26/06/2026;$;0.690217;US$;Dolar Americano; ;1.000000
+AUDL;Aud en Cop;26/06/2026;$;2376.82344;$;Pesos;01; 
+B01TF;Beta 0 Tes Tasa Fija;26/06/2026;%;11.313162; ; ;01; 
+B02TF;Beta 1 Tes Tasa Fija;26/06/2026;%;-3.339002; ; ;01; 
+B03TF;Beta 2 Tes Tasa Fija;26/06/2026;%;7.728956; ; ;01; 
+B0UVR;Beta 0 UVR;26/06/2026;%;6.093699; ; ;01; 
+B1UVR;Beta 1 UVR;26/06/2026;%;-0.485077; ; ;01; 
+B2UVR;Beta 2 UVR;26/06/2026;%;2.228769; ; ;01; 
+BBGM3;Nota BBVAGLMK COP 07022029 TPX;26/06/2026;%;0; ; ; ;1.000000
+BBGM5;Nota BBVAGL MK BV COP 14052027;26/06/2026;%;0; ; ; ;1.000000
+BBGM6;Nota BBVA GL MK BV COP 1305203;26/06/2026;%;0; ; ; ;1.000000
+BNP10;Nota BNP Paribas BRL 03082027;26/06/2026;%;0; ; ; ;1.000000
+BNP11;Nota BNP Paribas COP 13052030 ;26/06/2026;%;0; ; ; ;1.000000
+BNP6;Nota BNP Paribas 15062027 SPX;26/06/2026;%;0; ; ; ;1.000000
+BNP7;Nota BNP Paribas COP 05022029 ;26/06/2026;%;0; ; ; ;1.000000
+BNP9;Nota BNP Paribas COP 12072027;26/06/2026;%;0; ; ; ;1.000000
+BRL;RealdeBrazil/USD;26/06/2026;$;5.175862;US$;Dolar Americano; ;1.000000
+BRLL;Brl en Cop;26/06/2026;$;665.317227;$;Pesos;01; 
+CAD;DolarCanadiense/USD;26/06/2026;$;1.418209;US$;Dolar Americano; ;1.000000
+CADL;Cad en Cop;26/06/2026;$;2428.126018;$;Pesos;01; 
+CGMH4;Nota CGMH 08 Jul 2027 SPXFP;26/06/2026;%;0; ; ; ;1.000000
+CGMH5;Nota CGMH 03 Ago 2026 SPXFP;26/06/2026;%;0; ; ; ;1.000000
+CHF;FrancoSuizo/USD;26/06/2026;$;0.808526;US$;Dolar Americano; ;1.000000
+CHFL;Chf en Cop;26/06/2026;$;4259.098458;$;Pesos;01; 
+CLP;PesoChileno/USD;26/06/2026;$;922.34;US$;Dolar Americano; ;1.000000
+CLPL;Clp en Cop;26/06/2026;$;3.733536;$;Pesos;01; 
+COPC;Cad en Cop - CHR;26/06/2026;$;2428.126018;$;Pesos;01; 
+CPIL; ;26/06/2026;$;3766.254383;$;Pesos;01; 
+CTAHA;Cta Ahorro Bancafe;26/06/2026;%;5.6; ; ; ;1.000000
+CTAHB;Cta Ahorro Bogota;26/06/2026;%;10.3; ; ; ;1.000000
+CTAHC;Cta Ahorro Citibank;26/06/2026;%;2.1; ; ; ;1.000000
+CTAHF;Cta Ahorro Daviviend;26/06/2026;%;9.9; ; ; ;1.000000
+CTAHG;Cta Ahorro Bancolomb;26/06/2026;%;3; ; ; ;1.000000
+CTAHH;Cta Ahorro BBVAGanad;26/06/2026;%;10.15; ; ; ;1.000000
+CTAHI;Cta Ahorro Popular;26/06/2026;%;11.5; ; ; ;1.000000
+CTAHN;Cta Ahorro Santander;26/06/2026;%;10.25; ; ; ;1.000000
+CTAHO;Cta Ahorro Occidente;26/06/2026;%;9.15; ; ; ;1.000000
+CTAHP;Cta Ahorro Davibank;26/06/2026;%;10.2; ; ; ;1.000000
+CTAHR;Cta Ahorro Bancoldex;26/06/2026;%;10.15; ; ; ;1.000000
+CTAHS;Cta Ahorro CorpBanca;26/06/2026;%;7.02; ; ; ;1.000000
+CTAHU;Cta Ahorro Sudameris;26/06/2026;%;10.3; ; ; ;1.000000
+CTAHV;Cta Ahorro Caja Social;26/06/2026;%;3.3; ; ; ;1.000000
+EUR;EuroDE;26/06/2026;$;1.1401;US$;Dolar Americano; ;1.000000
+EURD;Derv Dolar/Euro;26/06/2026;$;0.877116;$;Pesos;01; 
+EURL;Eur en Cop;26/06/2026;$;3926.036959;$;Pesos;01; 
+GBP;LibraEsterlina/USD;26/06/2026;$;1.321809;US$;Dolar Americano; ;1.000000
+GBPL;Gbp en Cop;26/06/2026;$;4551.768587;$;Pesos;01; 
+GSI4;Nota GSI BRL 05032031 EEM;26/06/2026;%;0; ; ; ;1.000000
+IBR;IBR Plazo Overnight;26/06/2026;%;10.524; ; ; ;1.000000
+IBR0;IBR 28DiasTit360 Nom;26/06/2026;%;11.05; ; ; ; 
+IBR3M;IBR Plazo 3 Meses;26/06/2026;%;11.455; ; ; ;1.000000
+IBR5;IBR 28DiasTit365 Nom;26/06/2026;%;11.05; ; ;01; 
+IBRA;IBR EA Tit 360;26/06/2026;%;11.6272; ; ; ; 
+IBRB;IBR EA Tit 365;26/06/2026;%;11.6272; ; ;01; 
+JPMC8;Nota JPM Chase B 05022029 SPXF;26/06/2026;%;0; ; ; ;1.000000
+JPMC9;Nota JPM Chase B 15052028 SPXF;26/06/2026;%;0; ; ; ;1.000000
+JPY;Dolar * Yen;26/06/2026;$;161.652487;US$;Dolar Americano; ;1.000000
+MSFL2;Nota MS F LLC BRL 03082027 SPX;26/06/2026;%;0; ; ; ;1.000000
+MXN;PesoMexicano/USD;26/06/2026;$;17.515569;US$;Dolar Americano; ;1.000000
+MXNL;Mxn en Cop;26/06/2026;$;196.601665;$;Pesos;01; 
+NOK;CoronaNoruega/USD;26/06/2026;$;9.914481;US$;Dolar Americano; ;1.000000
+NOKL;Nok en Cop;26/06/2026;$;347.329319;$;Pesos;01; 
+SEK;CoronaSueca/USD;26/06/2026;$;9.716253;US$;Dolar Americano; ;1.000000
+SEKL;Sek en Cop;26/06/2026;$;354.415433;$;Pesos;01; 
+SFOIS; ;26/06/2026;%;3.64; ; ;01; 
+SIPP2;Nota Santander BRL 03082026 SP;26/06/2026;%;0; ; ; ;1.000000
+SOFR;SOFR Overnight;26/06/2026;%;3.64; ; ; ;1.000000
+TAOTF;TAO Tes Tasa Fija;26/06/2026;%;0.999063; ; ;01; 
+TAUVR;TAO 3 UVR;26/06/2026;%;2.834342; ; ;01; 
+TRM;USD Opcion;26/06/2026;$;3443.59;$;Pesos;01; 
+UDI;Unidad de Inversión MXN;26/06/2026;$;8.81778;$;Pesos; ;1.000000
+UDIC;Unidad de Inv. MXN - CAD;26/06/2026;$;1.400634;$;Pesos; ;1.000000
+UDIL;Unidad de Inversión COP;26/06/2026;$;1733.590234;$;Pesos;01; 
+US$;Dolar Americano;26/06/2026;$;3443.59;$;Pesos; ;1.000000
+USN; ;26/06/2026;$;3443.59;$;Pesos;01; 
+UVR;Unid Valor Real;26/06/2026;$;414.4748;$;Pesos; ; 
+UVRC;Unid Valor Real CAD;26/06/2026;$;5.85832;$;Pesos;01; 
+UVRV;Var Unid Valor Real;26/06/2026;%;5.74; ; ; ; 
+YEN;Ind Der Yen Rta Var;26/06/2026;$;21.302425;$;Pesos;01; 
