@@ -38,13 +38,18 @@ echo "############################################################"
 echo "#  Corte ${CORTE} (${MES} ${ANIO})"
 echo "############################################################"
 
-# ── 1) Entorno Python ───────────────────────────────────────────────────────
-if [ ! -d .venv ]; then python3 -m venv .venv; fi
+# ── 1) Entorno Python (reutiliza el venv; instala solo la 1a vez o REINSTALL=1) ─
+if [ ! -d .venv ]; then
+  python3 -m venv .venv
+  NEED_INSTALL=1
+fi
 # shellcheck disable=SC1091
 source .venv/bin/activate
 hash -r
-pip install -q --upgrade pip
-pip install -q -r requirements.txt
+if [ "${NEED_INSTALL:-0}" = "1" ] || [ "${REINSTALL:-0}" = "1" ]; then
+  pip install -q --upgrade pip
+  pip install -q -r requirements.txt
+fi
 
 # ── 2) Limpia salidas viejas de este corte (zip limpio) ─────────────────────
 rm -rf "$OUT" "salidas/swaps/${CORTE}" "salidas/swaps/${CORTE}_prev"
