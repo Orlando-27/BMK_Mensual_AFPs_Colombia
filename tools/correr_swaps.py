@@ -65,6 +65,39 @@ def correr(curvas_dir: str, fecha: str, sfc_path: str, out_dir: str,
     return res
 
 
+def _mtm(res: pd.DataFrame) -> dict:
+    """MtM neto por ISIN (VPN derecho - VPN obligacion)."""
+    der = pd.to_numeric(res["VPN_Derecho_Calc"], errors="coerce")
+    obl = pd.to_numeric(res["VPN_Oblig_Calc"], errors="coerce")
+    return dict(zip(res["ISIN"].astype(str), (der - obl).fillna(0.0)))
+
+
+def ajustar_camara(res: pd.DataFrame, res_prev: pd.DataFrame) -> pd.DataFrame:
+    """Ajusta los swaps de camara (IRS SOFR, CRCC liquidados a diario) a su
+    VARIACION DIARIA = MtM(corte) - MtM(dia habil anterior), que es el valor que
+    reporta la SFC (Formato_415) para estos. El resultado se coloca en la pata
+    derecho si es positivo (obligacion=0) o en obligacion si es negativo, como lo
+    reporta la SFC (una pata en cero). Los demas swaps quedan al corte, sin tocar.
+
+    res, res_prev: salidas del motor v6 (mismo universo de swaps) al corte y al
+    dia habil anterior, respectivamente."""
+    prev = _mtm(res_prev)
+    out = res.copy()
+    tipo = out["Tipo_Swap"].astype(str).str.upper()
+    es_cam = tipo.str.contains("SOF")  # IRS SOFR = camara
+    der = pd.to_numeric(out["VPN_Derecho_Calc"], errors="coerce").fillna(0.0)
+    obl = pd.to_numeric(out["VPN_Oblig_Calc"], errors="coerce").fillna(0.0)
+    n = 0
+    for i in out.index[es_cam]:
+        isin = str(out.at[i, "ISIN"])
+        var = (der[i] - obl[i]) - prev.get(isin, der[i] - obl[i])
+        out.at[i, "VPN_Derecho_Calc"] = var if var >= 0 else 0.0
+        out.at[i, "VPN_Oblig_Calc"] = 0.0 if var >= 0 else -var
+        n += 1
+    print(f"[swaps] camara (IRS SOFR): {n} swaps ajustados a variacion diaria")
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--curvas", required=True, help="Carpeta con SwapCC_*.txt / IND / Matriz_TC")

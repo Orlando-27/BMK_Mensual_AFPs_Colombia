@@ -38,6 +38,9 @@ def main() -> int:
     ap.add_argument("--curvas-val", help="Curvas de la fecha de VALORACION de derivados "
                     "(swaps Y forwards). Usa esto cuando 'todo esta valorado' a esa fecha.")
     ap.add_argument("--fecha-val", help="AAAA-MM-DD de valoracion de derivados (swaps Y forwards)")
+    ap.add_argument("--curvas-prev", help="Curvas del DIA HABIL ANTERIOR al corte, para "
+                    "valorar la variacion diaria de los swaps de camara (IRS SOFR).")
+    ap.add_argument("--fecha-prev", help="AAAA-MM-DD del dia habil anterior (swaps de camara)")
     a = ap.parse_args()
 
     # Fechas de valoracion de derivados. Con --curvas-val/--fecha-val, swaps Y
@@ -53,6 +56,14 @@ def main() -> int:
 
     print(f"=== 2. Valoracion de swaps (motor v6, fecha {swap_fecha}) ===")
     res = correr_swaps.correr(swap_curvas, swap_fecha, a.sfc, f"salidas/swaps/{a.corte}")
+    # Camara (CRCC): los IRS SOFR se liquidan a diario -> su valor reportado es la
+    # variacion diaria MtM(corte) - MtM(dia habil anterior). Si se pasan las curvas
+    # del dia anterior, se valora tambien ese dia y se ajusta la variacion.
+    if a.curvas_prev and a.fecha_prev:
+        print(f"    valorando dia habil anterior ({a.fecha_prev}) para variacion de camara ...")
+        res_prev = correr_swaps.correr(a.curvas_prev, a.fecha_prev, a.sfc,
+                                       f"salidas/swaps/{a.corte}_prev")
+        res = correr_swaps.ajustar_camara(res, res_prev)
     vpn = res[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]] if "ISIN" in res.columns else None
     # Output swap-por-swap (VPN, precio, duracion, convexidad, MtM) para el corte.
     try:
