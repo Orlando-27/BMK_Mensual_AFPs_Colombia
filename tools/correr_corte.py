@@ -33,20 +33,26 @@ def main() -> int:
     ap.add_argument("--anio", type=int, required=True)
     ap.add_argument("--sfc", required=True, help="Archivo SFC del corte")
     ap.add_argument("--curvas-pub", help="Carpeta de curvas de la fecha de PUBLICACION "
-                    "(para revaluar forwards como el macro). Si se omite, se usa el corte.")
+                    "(para revaluar solo forwards). Si se omite, se usa el corte.")
     ap.add_argument("--fecha-pub", help="AAAA-MM-DD de publicacion (fecha de valoracion de forwards)")
+    ap.add_argument("--curvas-val", help="Curvas de la fecha de VALORACION de derivados "
+                    "(swaps Y forwards). Usa esto cuando 'todo esta valorado' a esa fecha.")
+    ap.add_argument("--fecha-val", help="AAAA-MM-DD de valoracion de derivados (swaps Y forwards)")
     a = ap.parse_args()
 
-    # Forwards: el macro los revalua a la fecha de PUBLICACION con las curvas de ese
-    # dia. Si se pasan --curvas-pub/--fecha-pub, se preparan esas; si no, el corte.
-    fwd_curvas = a.curvas_pub or a.curvas
-    fwd_fecha = a.fecha_pub or a.corte
+    # Fechas de valoracion de derivados. Con --curvas-val/--fecha-val, swaps Y
+    # forwards se valoran a esa fecha (caso 'todo valorado al dia de publicacion').
+    # Si no, comportamiento previo: swaps al corte; forwards a --fecha-pub o corte.
+    swap_curvas = a.curvas_val or a.curvas
+    swap_fecha = a.fecha_val or a.corte
+    fwd_curvas = a.curvas_val or a.curvas_pub or a.curvas
+    fwd_fecha = a.fecha_val or a.fecha_pub or a.corte
     print(f"=== 1. Curvas forward ({fwd_fecha}) -> insumos/fwd_curves ===")
     infovalmer.preparar_forwards(fwd_curvas, fwd_fecha, "insumos/fwd_curves")
     print("    ok (FWTCOP/LIBBTS + paridades)")
 
-    print("=== 2. Valoracion de swaps (motor v6) ===")
-    res = correr_swaps.correr(a.curvas, a.corte, a.sfc, f"salidas/swaps/{a.corte}")
+    print(f"=== 2. Valoracion de swaps (motor v6, fecha {swap_fecha}) ===")
+    res = correr_swaps.correr(swap_curvas, swap_fecha, a.sfc, f"salidas/swaps/{a.corte}")
     vpn = res[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]] if "ISIN" in res.columns else None
     # Output swap-por-swap (VPN, precio, duracion, convexidad, MtM) para el corte.
     try:
