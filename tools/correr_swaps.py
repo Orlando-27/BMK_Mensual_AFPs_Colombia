@@ -30,6 +30,12 @@ def correr(curvas_dir: str, fecha: str, sfc_path: str, out_dir: str,
     ym = fecha.replace("-", "")
     out = Path(out_dir)
     insumos = out / "insumos"
+    # Se limpian INICIO/SWAPIND/curvas previos: si el dir acumula curvas de otra
+    # fecha (p. ej. una corrida anterior con --fecha-val distinta), el motor v6
+    # tomaria la fecha equivocada. Cada corrida deja SOLO los insumos de `fecha`.
+    if insumos.exists():
+        for p in insumos.glob("*.csv"):
+            p.unlink()
     insumos.mkdir(parents=True, exist_ok=True)
 
     # 1. Sabana SWAPIND desde el SFC -> CSV con el layout del motor.
