@@ -160,20 +160,24 @@ def _hoja_derivados(wb, F, der: pd.DataFrame, afps_ind):
         row += 1
 
     n_total = len(der)
-    n_swap_legs = int(der["tipo"].isin(["SWAP-IRS", "SWAP-CCS"]).sum())
+    n_pend = int((~der["valorado"].astype(bool)).sum())  # pendientes REALES tras valorar
     n_neg_nom = int((pd.to_numeric(der["nominal"], errors="coerce").fillna(0) < 0).sum())
     chk("Total filas de derivados", n_total, f'=COUNTA({dr(DC["tipo"])})')
     chk("Patas de swap (deben ser pares -> 0)", 0,
         f'=MOD(COUNTIF({dr(DC["tipo"])},"SWAP-IRS")+COUNTIF({dr(DC["tipo"])},"SWAP-CCS"),2)')
     chk("Nominales negativos", n_neg_nom, f'=COUNTIF({dr(DC["nominal"])},"<0")')
-    chk("Instrumentos sin valorar (pendientes)", n_swap_legs,
+    # Esperado = pendientes reales (0 cuando el motor v6 ya valoro todos los swaps).
+    chk("Instrumentos sin valorar (pendientes)", n_pend,
         f'=COUNTIF({dr(DC["valorado"])},FALSE)')
     cd.conditional_format(chk_first, 3, row - 1, 3,
         {"type": "cell", "criteria": "==", "value": '"OK"', "format": F["ok"]})
     cd.conditional_format(chk_first, 3, row - 1, 3,
         {"type": "cell", "criteria": "==", "value": '"REVISAR"', "format": F["bad"]})
-    cd.write(row + 1, 0, "Nota: los swaps quedan con valor de mercado pendiente hasta valorarlos "
-             "con el motor v6 (VPN por pata en las 3 fechas).", F["subtitle"])
+    _nota = ("Nota: swaps valorados con el motor v6 (VPN por pata al corte)."
+             if n_pend == 0 else
+             "Nota: los swaps quedan con valor de mercado pendiente hasta valorarlos "
+             "con el motor v6 (VPN por pata en las 3 fechas).")
+    cd.write(row + 1, 0, _nota, F["subtitle"])
     cd.freeze_panes(4, 0)
     return total_row
 
