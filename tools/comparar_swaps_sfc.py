@@ -82,16 +82,21 @@ def comparar(sfc_df: pd.DataFrame, val_df: pd.DataFrame):
         leg_tot = sub["sfc_vp_der"].abs().sum() + sub["sfc_vp_obl"].abs().sum()
         leg_err = ((sub["my_vp_der"] - sub["sfc_vp_der"]).abs().sum()
                    + (sub["my_vp_obl"] - sub["sfc_vp_obl"]).abs().sum())
+        sfc_mtm = sub["sfc_mtm"].sum()
+        mio_mtm = sub["my_mtm"].sum()
+        es_cam = bool(sub["es_camara"].all()) if "es_camara" in sub.columns else False
         return {
             "n": len(sub),
-            "SFC_der_MM": sub["sfc_vp_der"].sum() / 1e6,
-            "mio_der_MM": sub["my_vp_der"].sum() / 1e6,
-            "SFC_obl_MM": sub["sfc_vp_obl"].sum() / 1e6,
-            "mio_obl_MM": sub["my_vp_obl"].sum() / 1e6,
-            "err_patas_%": 100 * leg_err / leg_tot if leg_tot else np.nan,
-            "SFC_MtM_MM": sub["sfc_mtm"].sum() / 1e6,
-            "mio_MtM_MM": sub["my_mtm"].sum() / 1e6,
-            "corr_MtM": sub["my_mtm"].corr(sub["sfc_mtm"]),
+            # err de PATA (el indicador fiable: que tan bien casa cada pata con Precia)
+            "err_patas_%": round(100 * leg_err / leg_tot, 2) if leg_tot else np.nan,
+            "corr_MtM": round(sub["my_mtm"].corr(sub["sfc_mtm"]), 3),
+            "SFC_MtM_MM": round(sfc_mtm / 1e6, 1),
+            "mio_MtM_MM": round(mio_mtm / 1e6, 1),
+            # dif del MtM NETO: se amplifica cuando el neto (der-obl) es chico vs
+            # las patas; leer junto con err_patas y corr_MtM, no aislado.
+            "dif_MtM_%": round(100 * (mio_mtm - sfc_mtm) / abs(sfc_mtm), 1) if sfc_mtm else np.nan,
+            "nota": ("camara: reparto der/obl difiere; vale el neto (corr_MtM)"
+                     if es_cam else ""),
         }
 
     filas = []

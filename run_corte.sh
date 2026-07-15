@@ -92,13 +92,34 @@ python3 tools/consolidar_precios.py --sfc-dir insumos/sfc \
   --out "$OUT/precios_consolidados_${ANIO}.xlsx" || \
   echo "(aviso) no se pudo generar el consolidado de precios"
 
-# ── 8) Empaquetar TODAS las salidas del corte en un zip ─────────────────────
+# ── 8) Empaquetar SOLO los entregables utiles en un zip curado ──────────────
+#     Se arma una carpeta 'entrega/' con los archivos finales (deja fuera los
+#     intermedios y las alertas internas del pipeline) y se zipea solo eso.
+ENTREGA="$OUT/entrega"
+rm -rf "$ENTREGA"; mkdir -p "$ENTREGA"
+KEEP=(
+  "hoja_Benchmark_${CORTE}.xlsx"                 # hoja importable (entregable principal)
+  "controles_${CORTE}.xlsx"                      # controles formulados
+  "valoracion_swaps_industria_${CORTE}.xlsx"     # swap por swap (VPN/precio/DM/convex)
+  "valoracion_fwds_industria_${CORTE}.xlsx"      # forward por forward
+  "valoracion_futuros_industria_${CORTE}.xlsx"   # futuros
+  "sabana_condiciones_faciales_swaps_${CORTE}.xlsx"  # sabana SWAPIND
+  "comparacion_vs_macro_${CORTE}.xlsx"           # cuadre vs macro
+  "comparacion_swaps_vs_sfc_${CORTE}.xlsx"       # validacion swaps vs SFC/Precia
+  "alertas_mensuales_${CORTE}.xlsx"              # nuevos (region/moneda) + cambios
+  "precios_consolidados_${ANIO}.xlsx"            # precios por ISIN x mes
+  "resumen.json"                                 # resumen del corte
+)
+for f in "${KEEP[@]}"; do
+  [ -f "$OUT/$f" ] && cp "$OUT/$f" "$ENTREGA/" || echo "(aviso) no se genero $f"
+done
+
 ZIP="salidas_${CORTE}.zip"
 rm -f "$ZIP"
-zip -r "$ZIP" "$OUT" >/dev/null
+( cd "$ENTREGA" && zip -r "$REPO/$ZIP" . >/dev/null )
 echo
-echo "== ZIP listo: $ZIP ($(du -h "$ZIP" | cut -f1)) =="
-unzip -l "$ZIP" | tail -n +2 | head -40
+echo "== ZIP listo (solo entregables): $ZIP ($(du -h "$ZIP" | cut -f1)) =="
+unzip -l "$ZIP" | tail -n +2
 
 # ── 9) Descargar el zip ─────────────────────────────────────────────────────
 #     En Cloud Shell 'cloudshell download' abre la descarga en el navegador.
