@@ -49,7 +49,11 @@ INDICE = {"FS": "Fija", "SOF": "SOFR", "IBR": "IBR", "DTF": "DTF", "IPC": "IPC",
 # tema puro de frecuencia: los de PORVENIR parecen capitalizar intereses
 # (cero-cupon/bullet, factor ~1.57x nominal). Pendiente confirmar el codigo 7 con
 # el diccionario/mesa; entre tanto "Anual" reproduce el Benchmark macro.
-PERIODICIDAD = {3: "Trimestral", 5: "Semestral", 6: "Anual", 7: "Anual"}
+# Codigo 7 = "Al vencimiento": la pata capitaliza el interes (lo acumula y paga
+# una sola vez al vencimiento) en vez de pagar cupones periodicos. Son los swaps
+# con Amortizaciones cod 4 ("amortiza capital y paga intereses especiales"). El
+# motor v6 los valora como bullet a partir del nocional capitalizado reportado.
+PERIODICIDAD = {3: "Trimestral", 5: "Semestral", 6: "Anual", 7: "Al vencimiento"}
 # Base de calculo (col 45) — cosmetica (el motor v6 usa DAY_BASE por moneda).
 BASE = {1: "ACT/360", 2: "ACT/365"}
 
@@ -105,6 +109,11 @@ def construir(formato_415: pd.DataFrame, solo_industria: bool = True) -> pd.Data
         "obl_periodicidad_cod": num(c(44)),
         "obl_tasa_facial": num(c(43)),
         "obl_base_cod": num(c(45)),
+        # VPN por pata REPORTADO por la SFC/Precia (col 53/54, en COP). Es el
+        # nocional capitalizado observable para las patas "Al vencimiento" (no
+        # reconstruible sin la serie historica de fixings del indice flotante).
+        "sfc_vp_der": num(c(53)),
+        "sfc_vp_obl": num(c(54)),
     })
     df = df[tipo.isin([16, 17])].reset_index(drop=True)
     if solo_industria:
@@ -170,6 +179,8 @@ def a_swapind(sab: pd.DataFrame) -> pd.DataFrame:
         "Utilidad/Perdida": "", "POR": col("portafolio"), "IBR o/n": "",
         "Base Derecho": col("der_base"), "Base Obligación": col("obl_base"),
         "FECHA": "", "FCD": "", "FCO": "",
+        # VPN reportado por Precia (nocional capitalizado para patas al vencimiento).
+        "VPN Precia DER": col("sfc_vp_der"), "VPN Precia OBL": col("sfc_vp_obl"),
     })
     return out
 

@@ -435,13 +435,17 @@ def _fx_spot(moneda: str) -> float:
 
 def valorar_pata(tipo_swap: str, lado: str, clase: str, tfacial: str,
                  tasa: float, periodicidad: str, moneda: str, nominal: float,
-                 start: date, end: date) -> dict:
+                 start: date, end: date, vpn_reportado=None) -> dict:
     """
     Selecciona curvas apropiadas según tipo de swap y moneda, y delega a
     pata_fija o pata_flotante. Retorna el mismo dict más 'yield_venc'.
-    """
-    freq_m = FREQ_MONTHS[periodicidad]
 
+    periodicidad "Al vencimiento" => pata CAPITALIZANTE (bullet): el interés se
+    acumula y se paga una sola vez al vencimiento. El nocional capitalizado a la
+    fecha lo reporta Precia (vpn_reportado = VPN col53/54 del SFC, en moneda
+    nativa COP); reconstruirlo desde cero exigiría la serie histórica de fixings
+    del índice flotante, que no está en los insumos.
+    """
     # ─── Asignación de curvas según metodología Precia ───
     if tipo_swap == "IRS SOFUSD":
         # IRS SOFUSD single-curve: USDOIS proyecta y descuenta.
@@ -477,6 +481,41 @@ def valorar_pata(tipo_swap: str, lado: str, clase: str, tfacial: str,
     # Tipo de pata
     es_fija = (clase == "SWAP TF") or (tfacial == "FS")
 
+    # ─── Pata CAPITALIZANTE (bullet, "Al vencimiento") ───
+    # El interés se capitaliza y se paga una sola vez al vencimiento. El nocional
+    # capitalizado a la fecha es el que reporta Precia (vpn_reportado). Se modela
+    # como un único flujo al vencimiento: el VPN es ese nocional acumulado y la
+    # duración/convexidad se calculan como un cupón cero al vencimiento.
+    if periodicidad == "Al vencimiento":
+        _vpn = None
+        if vpn_reportado not in (None, ""):
+            try:
+                v = float(vpn_reportado)
+                if not np.isnan(v):
+                    _vpn = v
+            except (TypeError, ValueError):
+                _vpn = None
+        pv = _vpn if _vpn is not None else nominal
+        dias_al_venc = max(days_between(FECHA_VAL, end), 1)
+        df = discount_factor(curva_disc, dias_al_venc)
+        cf_mat = pv / df if df else pv  # flujo bruto al vencimiento (bullet)
+        res = {
+            "pv": pv,
+            "cashflows": [{
+                "fecha": end, "dias_accrual": days_between(start, end),
+                "dias_venc": dias_al_venc, "tasa": tasa, "cf": cf_mat,
+                "cf_interes": 0.0, "cf_capital": cf_mat, "df": df, "pv": pv,
+            }],
+            "precio": pv / nominal if nominal else 0.0,
+            "capitalizante": True,
+        }
+        y = zero_rate(curva_disc, dias_al_venc)
+        res["yield_venc"] = y
+        res["curva_disc"] = curva_disc
+        res["curva_proj"] = curva_proj
+        return res
+
+    freq_m = FREQ_MONTHS[periodicidad]
     if es_fija:
         res = pata_fija(
             nominal=nominal, tasa=tasa, start=start, end=end,
@@ -545,6 +584,7 @@ def valorar_swap(row: pd.Series) -> dict:
         moneda=row["Moneda"],
         nominal=float(row["Vr Nominal DER"]),
         start=f_compra, end=f_vcto,
+        vpn_reportado=row.get("VPN Precia DER"),
     )
     # Pata Obligación
     obl = valorar_pata(
@@ -556,6 +596,7 @@ def valorar_swap(row: pd.Series) -> dict:
         moneda=row["Moneda.1"],
         nominal=float(row["Vr Nominal"]),
         start=f_compra, end=f_vcto,
+        vpn_reportado=row.get("VPN Precia OBL"),
     )
 
     # Convertir a COP (metodología Precia: VPN en COP = PV_moneda × FX_spot)
