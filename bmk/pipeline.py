@@ -140,7 +140,10 @@ def correr(cfg: Config, archivo: str | None = None, vpn_swaps=None,
             fecha_v = valoracion_fwds.corte_a_serial(fecha_fwd or cfg.corte)
             fwd415 = valoracion_fwds.normalizar_415(arch.formato_415)
             fwd_val = valorar(fwd415, curvas, fecha_v)  # df crudo (para controles e inyeccion)
-            ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte, dir_curvas=dir_curvas)
+            # El output standalone se valora a la MISMA fecha (fecha_v) que la
+            # inyeccion en la hoja, para que ambos cuadren peso a peso.
+            ruta_fwd = valoracion_fwds.escribir(fwd415, cfg.dir_corte(), cfg.corte,
+                                                dir_curvas=dir_curvas, fecha_valoracion=fecha_v)
             # Futuros de TRM (tipo 4) valorados con el mismo motor.
             trm415 = valoracion_fwds.normalizar_415(arch.formato_415, tipo_derivado=4)
             if len(trm415):

@@ -127,8 +127,17 @@ def preparar_forwards(src_dir, fecha: str, out_dir) -> Path:
                                       ).to_csv(out / f"{nombre}.csv", index=False)
     for par, nombre in FWD_A_PUNTOS.items():
         _puntos(par, nombre)
-    # FWTCOP (descuento COP) <- COP colateral; LIBBTS (foraneo) <- USDOIS. En %.
-    for cc, nombre in (("COPColateralUSD", "FWTCOP"), ("USDOIS", "LIBBTS")):
+    # Curvas de descuento de forwards (en %). Decodificadas contract-level contra
+    # la hoja `Curvas` del macro (corte junio, valorado 10-jul); cada una casa al
+    # decimal con su fuente INFOVALMER:
+    #   FWTCOP (descuento COP de USDCOP)      <- IBR    (macro FWTCOP == IBR exacto)
+    #   FWTUSD (descuento USD de USDCOP)      <- USDCO  (tfwd = spot x DF(USDCO))
+    #   LIBBTS (descuento USD de los cruces)  <- USDOIS (macro LIBBTS == USDOIS)
+    #   FWTEUR (descuento EUR de EURUSD)      <- EUROIS (tfwd = spot x DF(EUROIS))
+    # USDCOP no usa puntos: tvpn = K x DF(IBR), tfwd = spot x DF(USDCO) (paridad
+    # cubierta bi-moneda). Verificado: reproduce la hoja Fwd Industria al peso.
+    for cc, nombre in (("IBR", "FWTCOP"), ("USDCO", "FWTUSD"),
+                       ("USDOIS", "LIBBTS"), ("EUROIS", "FWTEUR")):
         f = src / f"SwapCC_{cc}_Diaria_{ym}.txt"
         if f.exists():
             d = _leer_txt_curva(f)
