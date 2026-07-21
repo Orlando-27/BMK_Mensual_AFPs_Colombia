@@ -78,13 +78,21 @@ python3 tools/comparar_swaps_sfc.py \
   --valoracion "$OUT/valoracion_swaps_industria_${CORTE}.xlsx" \
   --out "$OUT/comparacion_swaps_vs_sfc_${CORTE}.xlsx"
 
-# ── 6) Comparacion completa vs el macro (si esta disponible) ────────────────
+# ── 6) DOS versiones de la hoja + comparacion vs el macro ───────────────────
+#   _precia : nuestra valoracion (curvas INFOVALMER + capitalizacion) -> casa con
+#             la SFC/Precia a <1% por pata. Es la hoja principal.
+#   _macro  : reconciliacion contra el Benchmark del macro (swaps tomados del
+#             macro por identificador) -> diferencia SWAP -> ~0. Solo si hay macro.
+cp "$OUT/hoja_Benchmark_${CORTE}.xlsx" "$OUT/hoja_Benchmark_${CORTE}_precia.xlsx"
 if [ -f "$MACRO" ]; then
   python3 tools/comparar_todo.py \
-    --macro "$MACRO" --nuestro "$OUT/hoja_Benchmark_${CORTE}.xlsx" \
+    --macro "$MACRO" --nuestro "$OUT/hoja_Benchmark_${CORTE}_precia.xlsx" \
     --out "$OUT/comparacion_vs_macro_${CORTE}.xlsx"
+  python3 tools/hoja_version_macro.py \
+    --nuestra "$OUT/hoja_Benchmark_${CORTE}.xlsx" --macro "$MACRO" \
+    --corte "$CORTE" --out "$OUT"
 else
-  echo "(aviso) sin macro ($MACRO): se omite la comparacion vs macro"
+  echo "(aviso) sin macro ($MACRO): solo se genera la version Precia"
 fi
 
 # ── 7) Consolidado de precios por ISIN x mes (con los SFC que haya) ──────────
@@ -98,7 +106,8 @@ python3 tools/consolidar_precios.py --sfc-dir insumos/sfc \
 ENTREGA="$OUT/entrega"
 rm -rf "$ENTREGA"; mkdir -p "$ENTREGA"
 KEEP=(
-  "hoja_Benchmark_${CORTE}.xlsx"                 # hoja importable (entregable principal)
+  "hoja_Benchmark_${CORTE}_precia.xlsx"          # hoja Precia (curvas INFOVALMER + capitalizacion)
+  "hoja_Benchmark_${CORTE}_macro.xlsx"           # hoja reconciliada vs macro (SWAP -> ~0)
   "controles_${CORTE}.xlsx"                      # controles formulados
   "valoracion_swaps_industria_${CORTE}.xlsx"     # swap por swap (VPN/precio/DM/convex)
   "valoracion_fwds_industria_${CORTE}.xlsx"      # forward por forward
