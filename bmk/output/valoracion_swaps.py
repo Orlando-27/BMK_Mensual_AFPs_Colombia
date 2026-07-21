@@ -55,19 +55,20 @@ def construir(valoracion_full: pd.DataFrame, sabana: pd.DataFrame,
         - pd.to_numeric(d["VPN_Oblig_Calc"], errors="coerce")
     out = pd.DataFrame({etq: d[col] if col in d.columns else "" for etq, col in COLS})
     if camara is not None:
+        # `camara` trae el VPN COMPLETO usado en el Benchmark: para los IRS SOFR
+        # (camara CRCC) es el VPN del DIA HABIL ANTERIOR; para el resto, el del corte.
         c = camara.copy()
         c["ISIN"] = c["ISIN"].astype(str).str.strip()
         cam = c[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]].rename(columns={
-            "VPN_Derecho_Calc": "VPN DER camara", "VPN_Oblig_Calc": "VPN OBL camara"})
+            "VPN_Derecho_Calc": "VPN DER (Benchmark)", "VPN_Oblig_Calc": "VPN OBL (Benchmark)"})
         out = out.merge(cam, on="ISIN", how="left")
-        der = pd.to_numeric(out["VPN DER camara"], errors="coerce")
-        obl = pd.to_numeric(out["VPN OBL camara"], errors="coerce")
-        out["MtM camara (usado en Benchmark)"] = der - obl
-        # Marca solo donde la camara cambia el valor (IRS SOFR); en el resto el
-        # valor de Benchmark = VPN completo.
-        cambia = (out["MtM camara (usado en Benchmark)"].round(0)
+        der = pd.to_numeric(out["VPN DER (Benchmark)"], errors="coerce")
+        obl = pd.to_numeric(out["VPN OBL (Benchmark)"], errors="coerce")
+        out["MtM (Benchmark)"] = der - obl
+        # Marca los IRS SOFR (valorados al dia anterior por camara CRCC).
+        cambia = (out["MtM (Benchmark)"].round(0)
                   != pd.to_numeric(out["MtM neto (DER-OBL)"], errors="coerce").round(0))
-        out["es_camara"] = cambia.map({True: "SI (variacion diaria)", False: ""})
+        out["camara (VPN dia anterior)"] = cambia.map({True: "SI", False: ""})
     return out
 
 

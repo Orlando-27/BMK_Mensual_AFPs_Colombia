@@ -82,7 +82,9 @@ def _combos(base: pd.DataFrame, solo_industria: bool) -> list[tuple[str, str]]:
 def _fila(afp, port, clas, clase, nemo, vr_mercado, nominal=0.0, moneda="",
           id_contrato="", pata="") -> dict:
     return {
-        "cod_portafolio": port, "afp": afp, "nemo": nemo, "isin": "",
+        # Para swaps, isin = numero de contrato (id_contrato), asi la hoja Benchmark
+        # muestra el identificador (p. ej. 2317) en vez del rotulo "SWAP TV".
+        "cod_portafolio": port, "afp": afp, "nemo": nemo, "isin": str(id_contrato),
         "clas_sfc": clas, "emisor": clas, "f_compra": "", "f_vcto": "",
         "moneda": moneda, "valor_nominal": nominal,
         "tasa_facial_ind": "", "tasa_facial_valor": "",

@@ -73,28 +73,28 @@ def _mtm(res: pd.DataFrame) -> dict:
 
 
 def ajustar_camara(res: pd.DataFrame, res_prev: pd.DataFrame) -> pd.DataFrame:
-    """Ajusta los swaps de camara (IRS SOFR, CRCC liquidados a diario) a su
-    VARIACION DIARIA = MtM(corte) - MtM(dia habil anterior), que es el valor que
-    reporta la SFC (Formato_415) para estos. El resultado se coloca en la pata
-    derecho si es positivo (obligacion=0) o en obligacion si es negativo, como lo
-    reporta la SFC (una pata en cero). Los demas swaps quedan al corte, sin tocar.
+    """Los IRS SOFR se compensan en camara (CRCC) y se reportan con 1 dia habil de
+    rezago; por eso se valoran al DIA HABIL ANTERIOR. Se reemplaza el VPN COMPLETO
+    por pata (derecho y obligacion) por el del dia anterior (res_prev). Los demas
+    swaps quedan al corte, sin tocar. NO se usa la variacion diaria: el Benchmark
+    lleva el VPN completo (como la Calculadora / la hoja del macro).
 
     res, res_prev: salidas del motor v6 (mismo universo de swaps) al corte y al
     dia habil anterior, respectivamente."""
-    prev = _mtm(res_prev)
+    prev_der = dict(zip(res_prev["ISIN"].astype(str),
+                        pd.to_numeric(res_prev["VPN_Derecho_Calc"], errors="coerce")))
+    prev_obl = dict(zip(res_prev["ISIN"].astype(str),
+                        pd.to_numeric(res_prev["VPN_Oblig_Calc"], errors="coerce")))
     out = res.copy()
-    tipo = out["Tipo_Swap"].astype(str).str.upper()
-    es_cam = tipo.str.contains("SOF")  # IRS SOFR = camara
-    der = pd.to_numeric(out["VPN_Derecho_Calc"], errors="coerce").fillna(0.0)
-    obl = pd.to_numeric(out["VPN_Oblig_Calc"], errors="coerce").fillna(0.0)
+    es_cam = out["Tipo_Swap"].astype(str).str.upper().str.contains("SOF")  # IRS SOFR
     n = 0
     for i in out.index[es_cam]:
         isin = str(out.at[i, "ISIN"])
-        var = (der[i] - obl[i]) - prev.get(isin, der[i] - obl[i])
-        out.at[i, "VPN_Derecho_Calc"] = var if var >= 0 else 0.0
-        out.at[i, "VPN_Oblig_Calc"] = 0.0 if var >= 0 else -var
-        n += 1
-    print(f"[swaps] camara (IRS SOFR): {n} swaps ajustados a variacion diaria")
+        if isin in prev_der:
+            out.at[i, "VPN_Derecho_Calc"] = prev_der[isin]
+            out.at[i, "VPN_Oblig_Calc"] = prev_obl[isin]
+            n += 1
+    print(f"[swaps] camara (IRS SOFR): {n} swaps con VPN completo al dia anterior")
     return out
 
 
