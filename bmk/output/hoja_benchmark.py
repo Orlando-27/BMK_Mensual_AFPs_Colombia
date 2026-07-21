@@ -154,8 +154,13 @@ def generar(clasificados: pd.DataFrame, incluir_columnas_formula: bool = True,
     vr = _num(df["vr_mercado"])
     nominal = _nominal_benchmark(df, vr)
     df["valor_nominal"] = nominal
-    # Precio inicial = Vr mercado / Nominal (=1 en caja, precio por unidad en RF/RV).
-    df["precio_proxy"] = (vr / nominal).where(nominal > 0)
+    # Precio inicial: en los SWAPS se inyecta el precio limpio del motor v6 (~par,
+    # ratio a par por pata); en el resto = Vr mercado / Nominal (=1 en caja, precio
+    # por unidad en RF/RV). Se admite nominal negativo (pata obligacion de swap):
+    # con el precio inyectado no se usa vr/nominal ahi.
+    calc = (vr / nominal).where(nominal.abs() > 0)
+    inj = _num(df["precio_proxy"]) if "precio_proxy" in df.columns else pd.Series(float("nan"), index=df.index)
+    df["precio_proxy"] = inj.where(inj.notna(), calc)
 
     out = pd.DataFrame()
     for _letra, header, campo in COLUMNAS:

@@ -135,11 +135,14 @@ def _swaps(base: pd.DataFrame, solo_industria: bool) -> pd.DataFrame:
         nemo_der = "SWAP TF" if str(r["ider"]).strip() == "FS" else "SWAP TV"
         nemo_obl = "SWAP TF" if str(r["iobl"]).strip() == "FS" else "SWAP TV"
         # VPN pendiente de valoracion (motor v6 con curvas del corte) -> vr_mercado NaN.
+        # Nominal: la pata que se PAGA (obligacion) va con signo NEGATIVO, como en
+        # el Benchmark del macro (asi el precio = vr/(nominal x FX) queda positivo
+        # ~par en ambas patas y el nominal neteado refleja la posicion).
         filas.append(_fila(r["afp"], r["port"], cs, "SWAP", nemo_der,
-                           float("nan"), nominal=r["nder"], moneda=r["mder"],
+                           float("nan"), nominal=abs(float(r["nder"] or 0)), moneda=r["mder"],
                            id_contrato=r["id_contrato"], pata="DER"))
         filas.append(_fila(r["afp"], r["port"], cs, "SWAP", nemo_obl,
-                           float("nan"), nominal=r["nobl"], moneda=r["mobl"],
+                           float("nan"), nominal=-abs(float(r["nobl"] or 0)), moneda=r["mobl"],
                            id_contrato=r["id_contrato"], pata="OBL"))
     return pd.DataFrame(filas)
 
@@ -149,24 +152,37 @@ def inyectar_vpn_swaps(der: pd.DataFrame, vpn_df: pd.DataFrame) -> pd.DataFrame:
     vpn_df: columnas ISIN, VPN_Derecho_Calc, VPN_Oblig_Calc (por contrato)."""
     if der is None or der.empty or vpn_df is None or vpn_df.empty:
         return der
-    m_der = dict(zip(vpn_df["ISIN"].astype(str), pd.to_numeric(vpn_df["VPN_Derecho_Calc"], errors="coerce")))
-    m_obl = dict(zip(vpn_df["ISIN"].astype(str), pd.to_numeric(vpn_df["VPN_Oblig_Calc"], errors="coerce")))
+    ids = vpn_df["ISIN"].astype(str)
+    m_der = dict(zip(ids, pd.to_numeric(vpn_df["VPN_Derecho_Calc"], errors="coerce")))
+    m_obl = dict(zip(ids, pd.to_numeric(vpn_df["VPN_Oblig_Calc"], errors="coerce")))
+    # Precio limpio por pata (ratio a par ~1.0) que calcula el motor v6. Si viene,
+    # se inyecta en 'precio_proxy' para que la hoja no lo recalcule como vr/nominal.
+    p_der = dict(zip(ids, pd.to_numeric(vpn_df["Precio_Der"], errors="coerce"))) if "Precio_Der" in vpn_df.columns else {}
+    p_obl = dict(zip(ids, pd.to_numeric(vpn_df["Precio_Obl"], errors="coerce"))) if "Precio_Obl" in vpn_df.columns else {}
     out = der.copy()
     es_swap = out["clasificacion"].astype(str).str.upper() == "SWAP"
     idc = out.get("id_contrato", pd.Series("", index=out.index)).astype(str)
     pata = out.get("pata", pd.Series("", index=out.index)).astype(str)
     nueva = out["vr_mercado"].copy()
+    if "precio_proxy" not in out.columns:
+        out["precio_proxy"] = pd.NA
+    precio = out["precio_proxy"].copy()
     for i in out.index[es_swap]:
         # Pata derecho se recibe (+VPN); pata obligacion se paga (-VPN). Asi las
         # dos filas netean al MtM del swap (como en el Benchmark del macro).
         if pata[i] == "DER":
             v = m_der.get(idc[i])
+            pr = p_der.get(idc[i])
         else:
             vo = m_obl.get(idc[i])
             v = -vo if vo is not None and pd.notna(vo) else None
+            pr = p_obl.get(idc[i])
         if v is not None and pd.notna(v):
             nueva[i] = v
+        if pr is not None and pd.notna(pr):
+            precio[i] = pr
     out["vr_mercado"] = nueva
+    out["precio_proxy"] = precio
     return out
 
 

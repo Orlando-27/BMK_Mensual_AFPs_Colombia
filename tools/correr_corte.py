@@ -66,7 +66,11 @@ def main() -> int:
         res_prev = correr_swaps.correr(a.curvas_prev, a.fecha_prev, a.sfc,
                                        f"salidas/swaps/{a.corte}_prev")
         res_iny = correr_swaps.ajustar_camara(res, res_prev)  # no muta res (copia)
-    vpn = res_iny[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]] if "ISIN" in res_iny.columns else None
+    _cols_vpn = ["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]
+    for _pc in ("Precio_Der", "Precio_Obl"):  # precio limpio por pata (para la hoja)
+        if _pc in res_iny.columns:
+            _cols_vpn.append(_pc)
+    vpn = res_iny[_cols_vpn] if "ISIN" in res_iny.columns else None
     # Output swap-por-swap: VPN COMPLETO (res) + columnas con la variacion de camara
     # (res_iny) que es lo que se inyecta al Benchmark para los IRS SOFR.
     try:
