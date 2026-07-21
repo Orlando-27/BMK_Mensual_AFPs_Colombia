@@ -56,23 +56,27 @@ def main() -> int:
 
     print(f"=== 2. Valoracion de swaps (motor v6, fecha {swap_fecha}) ===")
     res = correr_swaps.correr(swap_curvas, swap_fecha, a.sfc, f"salidas/swaps/{a.corte}")
-    # Camara (CRCC): los IRS SOFR se liquidan a diario -> su valor reportado es la
-    # variacion diaria MtM(corte) - MtM(dia habil anterior). Si se pasan las curvas
-    # del dia anterior, se valora tambien ese dia y se ajusta la variacion.
+    # `res` = VPN COMPLETO por pata (igual que la Calculadora Swap del Excel).
+    # Camara (CRCC): los IRS SOFR se liquidan a diario -> al Benchmark se inyecta su
+    # variacion diaria MtM(corte) - MtM(dia habil anterior), NO el VPN completo. El
+    # VPN completo se conserva para el detalle swap-por-swap.
+    res_iny = res
     if a.curvas_prev and a.fecha_prev:
         print(f"    valorando dia habil anterior ({a.fecha_prev}) para variacion de camara ...")
         res_prev = correr_swaps.correr(a.curvas_prev, a.fecha_prev, a.sfc,
                                        f"salidas/swaps/{a.corte}_prev")
-        res = correr_swaps.ajustar_camara(res, res_prev)
-    vpn = res[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]] if "ISIN" in res.columns else None
-    # Output swap-por-swap (VPN, precio, duracion, convexidad, MtM) para el corte.
+        res_iny = correr_swaps.ajustar_camara(res, res_prev)  # no muta res (copia)
+    vpn = res_iny[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]] if "ISIN" in res_iny.columns else None
+    # Output swap-por-swap: VPN COMPLETO (res) + columnas con la variacion de camara
+    # (res_iny) que es lo que se inyecta al Benchmark para los IRS SOFR.
     try:
         from bmk.ingest import sfc as _sfc
         from bmk.pricing.swaps import sabana as _sab
         from bmk.output import valoracion_swaps as _vsw
         _cfg0 = Config(anio=a.anio, mes=a.mes)
         _sabana = _sab.construir(_sfc.leer(a.sfc).formato_415)
-        _ruta = _vsw.escribir(res, _sabana, _cfg0.dir_corte(), a.corte)
+        _cam = res_iny if res_iny is not res else None
+        _ruta = _vsw.escribir(res, _sabana, _cfg0.dir_corte(), a.corte, camara=_cam)
         print(f"    valoracion swap-por-swap -> {_ruta}")
     except Exception as e:  # noqa: BLE001
         print(f"    (aviso) no se pudo escribir la valoracion detallada de swaps: {str(e)[:120]}")

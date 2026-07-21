@@ -34,8 +34,15 @@ COLS = [
 ]
 
 
-def construir(valoracion_full: pd.DataFrame, sabana: pd.DataFrame) -> pd.DataFrame:
-    """Une la valoracion v6 con la sabana por numero de contrato (ISIN)."""
+def construir(valoracion_full: pd.DataFrame, sabana: pd.DataFrame,
+              camara: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Une la valoracion v6 con la sabana por numero de contrato (ISIN).
+
+    valoracion_full trae el VPN COMPLETO por pata (igual que la Calculadora Swap).
+    Si se pasa `camara` (la misma valoracion con la variacion diaria ya aplicada a
+    los IRS SOFR), se agregan columnas con esa variacion, que es el valor que se
+    inyecta al Benchmark para los swaps de camara. Asi el detalle muestra AMBOS:
+    el VPN completo (comparable con el Excel) y la variacion de camara."""
     v = valoracion_full.copy()
     v["ISIN"] = v["ISIN"].astype(str).str.strip()
     s = sabana.copy()
@@ -47,14 +54,28 @@ def construir(valoracion_full: pd.DataFrame, sabana: pd.DataFrame) -> pd.DataFra
     d["mtm"] = pd.to_numeric(d["VPN_Derecho_Calc"], errors="coerce") \
         - pd.to_numeric(d["VPN_Oblig_Calc"], errors="coerce")
     out = pd.DataFrame({etq: d[col] if col in d.columns else "" for etq, col in COLS})
+    if camara is not None:
+        c = camara.copy()
+        c["ISIN"] = c["ISIN"].astype(str).str.strip()
+        cam = c[["ISIN", "VPN_Derecho_Calc", "VPN_Oblig_Calc"]].rename(columns={
+            "VPN_Derecho_Calc": "VPN DER camara", "VPN_Oblig_Calc": "VPN OBL camara"})
+        out = out.merge(cam, on="ISIN", how="left")
+        der = pd.to_numeric(out["VPN DER camara"], errors="coerce")
+        obl = pd.to_numeric(out["VPN OBL camara"], errors="coerce")
+        out["MtM camara (usado en Benchmark)"] = der - obl
+        # Marca solo donde la camara cambia el valor (IRS SOFR); en el resto el
+        # valor de Benchmark = VPN completo.
+        cambia = (out["MtM camara (usado en Benchmark)"].round(0)
+                  != pd.to_numeric(out["MtM neto (DER-OBL)"], errors="coerce").round(0))
+        out["es_camara"] = cambia.map({True: "SI (variacion diaria)", False: ""})
     return out
 
 
 def escribir(valoracion_full: pd.DataFrame, sabana: pd.DataFrame,
-             out_dir: str | Path, corte: str) -> str:
+             out_dir: str | Path, corte: str, camara: pd.DataFrame | None = None) -> str:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    df = construir(valoracion_full, sabana)
+    df = construir(valoracion_full, sabana, camara=camara)
     dest = out_dir / f"valoracion_swaps_industria_{corte}.xlsx"
     with pd.ExcelWriter(dest, engine="xlsxwriter") as xw:
         df.to_excel(xw, sheet_name="Valoracion Swaps", index=False)
